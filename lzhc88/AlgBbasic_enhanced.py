@@ -145,7 +145,7 @@ def read_in_algorithm_codes_and_tariffs(alg_codes_file):
 ############ THE CITY FILE IS IN THE FOLDER 'city-files'.
 ############
 
-input_file = "AISearchfile012.txt"
+input_file = "AISearchfile058.txt"
 
 ############
 ############ PLEASE SCROLL DOWN UNTIL THE NEXT BLOCK OF CAPITALIZED COMMENTS.
@@ -323,13 +323,14 @@ tour_of_nearest_neighbour,tour_length_of_nearest_neighbour = basic_greedy()
 ####Parameters, user-defined####
 max_it = 20 #maximum number of iterations
 N= num_cities #number of ants
-tao_0 = N/tour_length_of_nearest_neighbour #initial pheromone deposit
+w=6
 row = 0.5 #pheromone decay rate
+tao_0 = w*(w-1)/(row*tour_length_of_nearest_neighbour) #initial pheromone deposit
 alpha = 1
 beta = 3
-w=num_cities
 
-added_note+=str(N)+' = number of ants, '+str(max_it)+' = maximum number of iterations, '+str(alpha)+' = alpha, '+str(beta)+' = beta, '+str(row)+' = row'+str(w)' = w'
+
+added_note+=str(N)+' = number of ants, '+str(max_it)+' = maximum number of iterations, '+str(alpha)+' = alpha, '+str(beta)+' = beta, '+str(row)+' = row'+str(w)+' = w'
 
 ####helpful structures####
 class Ant:
@@ -446,20 +447,34 @@ def ant_colony_opt():
             ant.path_cost+=dist_matrix[ant.current][ant.visited_vertices[0]]
             ant.visited.append([ant.current,ant.visited_vertices[0]])
             #print(ant.visited_vertices,ant.path_cost)
-        min_path_cost=min(my_ants,key=lambda ant:ant.path_cost)
-        if min_path_cost.path_cost<best_tour_length:
-            best_tour = min_path_cost.visited_vertices
-            best_tour_length = min_path_cost.path_cost
+        #find ant with minimum path cost and compare with current best_tour path cost
+        my_ants.sort(key=lambda ant:ant.path_cost)
+        if my_ants[0].path_cost<best_tour_length:
+            best_tour = my_ants[0].visited_vertices
+            best_tour_length = my_ants[0].path_cost
         ##deposit,evaporate pheromone on edges
         #print('--------------')
         list_of_pheromone_deposit = {}
+        list_of_best_tour_pheromone_deposit={}#for elitist ant system
+        count=1
         for ant in my_ants:
             for edge in ant.visited:
-                p = 1/(ant.path_cost)
+                if count<=w:#rank-based ant system
+                    p=(w-count)*(1/(ant.path_cost))
+                else:
+                    p = 1/(ant.path_cost)
                 try:
                     list_of_pheromone_deposit[tuple(edge)]+=p
                 except:
                     list_of_pheromone_deposit[tuple(edge)]=p
+                ###look if edge is in best_tour####
+                if edge in best_tour:
+                    p_bst = 1/(best_tour_length)
+                    try:
+                        list_of_best_tour_pheromone_deposit[tuple(edge)]+=p_bst
+                    except:
+                        list_of_best_tour_pheromone_deposit[tuple(edge)]=p_bst
+            count+=1
         for i in range(num_cities):
             for j in range(num_cities):
                 evap = (1-row)*pheromone_matrix[i][j]
@@ -467,7 +482,10 @@ def ant_colony_opt():
                     pheromone_matrix[i][j]= evap+list_of_pheromone_deposit[(i,j)]
                 except:
                     pheromone_matrix[i][j]= evap
-        
+                try:
+                    pheromone_matrix[i][j]+=(w*list_of_best_tour_pheromone_deposit[(i,j)])
+                except:
+                    pheromone_matrix[i][j]=pheromone_matrix[i][j]    
     return best_tour,best_tour_length
 
 #print(dist_matrix)

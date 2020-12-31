@@ -145,7 +145,7 @@ def read_in_algorithm_codes_and_tariffs(alg_codes_file):
 ############ THE CITY FILE IS IN THE FOLDER 'city-files'.
 ############
 
-input_file = "AISearchfile012.txt"
+input_file = "AISearchfile175.txt"
 
 ############
 ############ PLEASE SCROLL DOWN UNTIL THE NEXT BLOCK OF CAPITALIZED COMMENTS.
@@ -321,8 +321,8 @@ tour_of_nearest_neighbour,tour_length_of_nearest_neighbour = basic_greedy()
 
 
 ####Parameters, user-defined####
-max_it = 2 #maximum number of iterations
-N= 2 #number of ants
+max_it = 20 #maximum number of iterations
+N= num_cities #number of ants
 tao_0 = N/tour_length_of_nearest_neighbour #initial pheromone deposit
 row = 0.5 #pheromone decay rate
 alpha = 1
@@ -349,11 +349,6 @@ def build_pheromone_matrix():
     return matrix
 pheromone_matrix = build_pheromone_matrix()
 
-######deposits pheromone on the edge that has been visited by this ant############
-def pheromone_deposit_each_ant(ant,edge): #edge is a tuple
-    if edge in ant.visited:
-        return 1/(ant.path_cost)
-    return 0
 
     
 def probabilities_of_vertices(ant):
@@ -450,6 +445,7 @@ def ant_colony_opt():
             ant.path_cost+=dist_matrix[ant.current][ant.visited_vertices[0]]
             ant.visited.append([ant.current,ant.visited_vertices[0]])
             #print(ant.visited_vertices,ant.path_cost)
+        #find ant with minimum path cost and compare with current best_tour path cost
         min_path_cost=min(my_ants,key=lambda ant:ant.path_cost)
         if min_path_cost.path_cost<best_tour_length:
             best_tour = min_path_cost.visited_vertices

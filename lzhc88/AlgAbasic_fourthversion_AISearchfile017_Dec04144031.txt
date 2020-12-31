@@ -1,5 +1,0 @@
-USER = lzhc88 (Hanna Foerster),
-ALGORITHM CODE = BG, NAME OF CITY-FILE = AISearchfile017.txt,
-SIZE = 17, TOUR LENGTH = 1772,
-0,15,2,5,12,6,16,9,8,4,11,1,13,10,3,7,14,
-NOTE = 

@@ -1,0 +1,5 @@
+USER = lzhc88 (Hanna Foerster),
+ALGORITHM CODE = AC, NAME OF CITY-FILE = AISearchfile058.txt,
+SIZE = 58, TOUR LENGTH = 25876,
+7,4,43,8,34,54,3,20,57,21,9,36,30,48,5,46,38,22,15,49,2,51,44,6,11,16,39,0,18,24,29,10,31,42,47,35,55,32,41,53,52,12,14,45,56,23,19,37,1,33,25,26,13,40,50,28,27,17,
+NOTE = 1000 = number of ants 100 = maximum number of iterations

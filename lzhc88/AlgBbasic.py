@@ -315,7 +315,7 @@ def basic_greedy():
     
 
 starttime = time.time()      
-
+#####determine the intial best-tour by an initial basic greedy search##########
 tour_of_nearest_neighbour,tour_length_of_nearest_neighbour = basic_greedy()
 
 
@@ -339,6 +339,7 @@ class Ant:
         self.visited_vertices =[]
         self.path_cost=0
 
+#########pheromone to deposit on each edge...recomputed every round##############
 def build_pheromone_matrix():
     matrix = []
     for i in range(num_cities):
@@ -348,6 +349,7 @@ def build_pheromone_matrix():
     return matrix
 pheromone_matrix = build_pheromone_matrix()
 
+######deposits pheromone on each dege that has been visited by this ant############
 def pheromone_deposit_each_ant(ant,edge): #edge is a tuple
     if edge in ant.visited:
         return 1/(ant.path_cost)
@@ -362,12 +364,13 @@ def probabilities_of_vertices(ant):
         if i in ant.visited_vertices:
             continue
         else:
-            if dist_matrix[ant.current][i]==0:
-                heuristic_desirabilities.append(1)
-            else:
-                heuristic_desirabilities.append(1/dist_matrix[ant.current][i])
-    if len(heuristic_desirabilities)==0:
+            if dist_matrix[ant.current][i]==0:#case that distance between two cities is 0
+                heuristic_desirabilities.append(1)#this is very desired, so 1 is added
+            else:#normal case, calculate desirability of going to an unvisited city
+                heuristic_desirabilities.append(1/dist_matrix[ant.current][i])#1/length of edge
+    if len(heuristic_desirabilities)==0:#all cities were visited
         return 1 ###finished
+    #####Now calculate the overall probability of each edge being traversed next####
     probies = []
     index =0
     sum_of_all =0
@@ -377,6 +380,7 @@ def probabilities_of_vertices(ant):
         if i in ant.visited_vertices:
             continue
         else:
+            ###prob=(current pheromone level at edge)^alpha*(1/length of edge)^beta
             prob=((pheromone_matrix[ant.current][i])**alpha)*((heuristic_desirabilities[index])**beta)
             sum_of_all+=prob
             probies.append(prob)
@@ -389,6 +393,7 @@ def probabilities_of_vertices(ant):
         if i in ant.visited_vertices:
             continue
         else:
+            ####the overall probability of each edge finally computed######
             probabilities.append(probies[index]/sum_of_all)
             index+=1
     return probabilities

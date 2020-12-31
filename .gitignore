@@ -8,5 +8,6 @@ alg_codes_and_tariffs.txt
 skeleton.py
 validate_before_handin.py
 *.txt
+lzhc88/*.txt
 lzhc88/AlgCbasic_enhanced.py
 lzhc88/AlgCbasic_enhanced2.py

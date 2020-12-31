@@ -145,7 +145,7 @@ def read_in_algorithm_codes_and_tariffs(alg_codes_file):
 ############ THE CITY FILE IS IN THE FOLDER 'city-files'.
 ############
 
-input_file = "AISearchfile535.txt"
+input_file = "AISearchfile012.txt"
 
 ############
 ############ PLEASE SCROLL DOWN UNTIL THE NEXT BLOCK OF CAPITALIZED COMMENTS.
@@ -321,8 +321,8 @@ tour_of_nearest_neighbour,tour_length_of_nearest_neighbour = basic_greedy()
 
 
 ####Parameters, user-defined####
-max_it = 20 #maximum number of iterations
-N= 20 #number of ants
+max_it = 2 #maximum number of iterations
+N= 2 #number of ants
 tao_0 = N/tour_length_of_nearest_neighbour #initial pheromone deposit
 row = 0.5 #pheromone decay rate
 alpha = 1
@@ -349,7 +349,7 @@ def build_pheromone_matrix():
     return matrix
 pheromone_matrix = build_pheromone_matrix()
 
-######deposits pheromone on each dege that has been visited by this ant############
+######deposits pheromone on the edge that has been visited by this ant############
 def pheromone_deposit_each_ant(ant,edge): #edge is a tuple
     if edge in ant.visited:
         return 1/(ant.path_cost)
@@ -415,8 +415,8 @@ def ant_colony_opt():
             ant.visited_vertices =[ant.current]
             ant.path_cost=0
             for i in range(num_cities):##create a full length path for each ant, loop num_cities times
-                probabilities = probabilities_of_vertices(ant)
-                if probabilities ==1:
+                probabilities = probabilities_of_vertices(ant) #get the probability that ant traverses each of the unvisited vertices
+                if probabilities ==1:##finished case###
                     break
                 else:
                     #print(ant.current)
@@ -426,7 +426,11 @@ def ant_colony_opt():
                     past = probabilities[0]
                     next_vertex = 0
                     #print('**',rand_float,'**')
-                    for e in range(num_cities): #for all neighbouring vertices of i, compute next vertex probability
+                    #The probability of each vertex being selected next was computed, now the ant will randomly choose 
+                    #which vertex to select according to the probabilities
+                    #all probabilities add up to 1, so select vertex according to random float between 0 and 1
+                    #if the probability of a vertex and the sum of the proabilities of vertices before is bigger than said float, then this vertex is chosen
+                    for e in range(num_cities):
                         if e == ant.current:
                             continue
                         elif e in ant.visited_vertices:
@@ -454,9 +458,9 @@ def ant_colony_opt():
         #print('--------------')
         list_of_pheromone_deposit = {}
         for ant in my_ants:
-            
             for edge in ant.visited:
-                p = pheromone_deposit_each_ant(ant, edge)
+                p = 1/(ant.path_cost)
+                #pheromone_deposit_each_ant(ant, edge)
                 try:
                     list_of_pheromone_deposit[tuple(edge)]+=p
                 except:

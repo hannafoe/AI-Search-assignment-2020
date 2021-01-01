@@ -145,7 +145,7 @@ def read_in_algorithm_codes_and_tariffs(alg_codes_file):
 ############ THE CITY FILE IS IN THE FOLDER 'city-files'.
 ############
 
-input_file = "AISearchfile042.txt"
+input_file = "AISearchfile048.txt"
 
 ############
 ############ PLEASE SCROLL DOWN UNTIL THE NEXT BLOCK OF CAPITALIZED COMMENTS.
@@ -321,7 +321,7 @@ tour_of_nearest_neighbour,tour_length_of_nearest_neighbour = basic_greedy()
 
 
 ####Parameters, user-defined####
-max_it = 50 #maximum number of iterations
+max_it = 200 #maximum number of iterations
 N=num_cities#number of ants
 w=6
 row = 0.85 #pheromone decay rate
@@ -426,6 +426,8 @@ def ant_colony_opt():
                     #print(ant.current)
                     #print(probabilities)
                     rand_float = random.random() # Random float:  0.0 <= x < 1.0
+                    #if(t>30 and t%5 and ant.ID%5==0):
+                    #    rand_float=0.01
                     index = 1
                     past = probabilities[0]
                     next_vertex = 0

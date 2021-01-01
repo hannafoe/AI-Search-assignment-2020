@@ -145,7 +145,7 @@ def read_in_algorithm_codes_and_tariffs(alg_codes_file):
 ############ THE CITY FILE IS IN THE FOLDER 'city-files'.
 ############
 
-input_file = "AISearchfile058.txt"
+input_file = "AISearchfile042.txt"
 
 ############
 ############ PLEASE SCROLL DOWN UNTIL THE NEXT BLOCK OF CAPITALIZED COMMENTS.
@@ -321,10 +321,10 @@ tour_of_nearest_neighbour,tour_length_of_nearest_neighbour = basic_greedy()
 
 
 ####Parameters, user-defined####
-max_it = 20 #maximum number of iterations
-N= num_cities #number of ants
+max_it = 50 #maximum number of iterations
+N=num_cities#number of ants
 w=6
-row = 0.5 #pheromone decay rate
+row = 0.85 #pheromone decay rate
 tao_0 = w*(w-1)/(row*tour_length_of_nearest_neighbour) #initial pheromone deposit
 alpha = 1
 beta = 3
@@ -404,8 +404,15 @@ def ant_colony_opt():
     for i in range(N):
         new_ant = Ant(i)
         my_ants.append(new_ant)
-    for t in range(max_it): ###maybe change max_it later to time.time 
+    ##reassignment as local variables to be able to change its values locally
+    w_local=w
+    row_local=row
+    for t in range(max_it): ###maybe change max_it later to time.time
+        #if t%2==0:
+        #    w_local+=1 #w is better left without incrementing
         #print(pheromone_matrix)
+        if t==int(max_it*0.8):
+            row_local=0.5
         for ant in my_ants:
             ant.current=random.randint(0, num_cities-1)###WHY num_cities-2 and not num_cities-1????
             ant.visited = [] #visited edges
@@ -422,23 +429,42 @@ def ant_colony_opt():
                     index = 1
                     past = probabilities[0]
                     next_vertex = 0
+                    best =  probabilities[0]
+                    if (t%2==0 and t<6) or (t>=6 and t%10==0):
+                        index=0
+                        first=0
+                        for e in range(num_cities): #for all neighbouring vertices of i, compute next vertex probability
+                            if e == ant.current:
+                                continue
+                            elif e in ant.visited_vertices:
+                                continue
+                            else:
+                                if first==0:
+                                    next_vertex=e
+                                    first+=1
+                                #print(past)
+                                if probabilities[index]>best:
+                                    next_vertex=e
+                                    best=probabilities[index]
+                                index+=1
                     #print('**',rand_float,'**')
                     #The probability of each vertex being selected next was computed, now the ant will randomly choose 
                     #which vertex to select according to the probabilities
                     #all probabilities add up to 1, so select vertex according to random float between 0 and 1
                     #if the probability of a vertex and the sum of the proabilities of vertices before is bigger than said float, then this vertex is chosen
-                    for e in range(num_cities): #for all neighbouring vertices of i, compute next vertex probability
-                        if e == ant.current:
-                            continue
-                        elif e in ant.visited_vertices:
-                            continue
-                        else:
-                            #print(past)
-                            if rand_float<past:
-                                next_vertex = e
-                                break
-                            past += probabilities[index]
-                            index+=1
+                    else:
+                        for e in range(num_cities): #for all neighbouring vertices of i, compute next vertex probability
+                            if e == ant.current:
+                                continue
+                            elif e in ant.visited_vertices:
+                                continue
+                            else:
+                                #print(past)
+                                if rand_float<past:
+                                    next_vertex = e
+                                    break
+                                past += probabilities[index]
+                                index+=1
                     #print(next_vertex)
                     ant.visited.append([ant.current,next_vertex])
                     ant.path_cost+=dist_matrix[ant.current][next_vertex]
@@ -459,8 +485,8 @@ def ant_colony_opt():
         count=1
         for ant in my_ants:
             for edge in ant.visited:
-                if count<=w:#rank-based ant system
-                    p=(w-count)*(1/(ant.path_cost))
+                if count<=w_local:#rank-based ant system
+                    p=(w_local-count)*(1/(ant.path_cost))
                 else:
                     p = 1/(ant.path_cost)
                 try:
@@ -477,15 +503,15 @@ def ant_colony_opt():
             count+=1
         for i in range(num_cities):
             for j in range(num_cities):
-                evap = (1-row)*pheromone_matrix[i][j]
+                evap = (1-row_local)*pheromone_matrix[i][j]
                 try:
                     pheromone_matrix[i][j]= evap+list_of_pheromone_deposit[(i,j)]
                 except:
                     pheromone_matrix[i][j]= evap
                 try:
-                    pheromone_matrix[i][j]+=(w*list_of_best_tour_pheromone_deposit[(i,j)])
+                    pheromone_matrix[i][j]+=(w_local*list_of_best_tour_pheromone_deposit[(i,j)])
                 except:
-                    pheromone_matrix[i][j]=pheromone_matrix[i][j]    
+                    pheromone_matrix[i][j]=pheromone_matrix[i][j] 
     return best_tour,best_tour_length
 
 #print(dist_matrix)
@@ -512,7 +538,7 @@ print('Time: ',endtime-starttime)
 ############
 ############ DO NOT TOUCH OR ALTER THE CODE BELOW THIS POINT! YOU HAVE BEEN WARNED!
 ############
-
+'''
 flag = "good"
 length = len(tour)
 for i in range(0, length):
@@ -565,7 +591,7 @@ f.write(",\nNOTE = " + added_note)
 f.close()
 print("I have successfully written your tour to the tour file:\n   " + output_file_name + ".")
     
-
+'''
 
 
 

@@ -514,9 +514,7 @@ def ant_colony_opt():
                     ant.current = next_vertex
             ant.path_cost+=dist_matrix[ant.current][ant.visited_vertices[0]]
             ant.visited.append([ant.current,ant.visited_vertices[0]])
-            print('-----')
-            if time.time()-starttime>300:
-                print('STOP')
+            if time.time()-starttime>55:
                 stop_flag=1
                 break
             #print(ant.visited_vertices,ant.path_cost)
@@ -559,7 +557,7 @@ def ant_colony_opt():
                     pheromone_matrix[i][j]+=(w_local*list_of_best_tour_pheromone_deposit[(i,j)])
                 except:
                     pheromone_matrix[i][j]=pheromone_matrix[i][j] 
-        if time.time()-starttime>300 or stop_flag==1:
+        if time.time()-starttime>55 or stop_flag==1:
             return best_tour,best_tour_length
     return best_tour,best_tour_length
 

@@ -145,7 +145,7 @@ def read_in_algorithm_codes_and_tariffs(alg_codes_file):
 ############ THE CITY FILE IS IN THE FOLDER 'city-files'.
 ############
 
-input_file = "AISearchfile048.txt"
+input_file = "AISearchfile535.txt"
 
 ############
 ############ PLEASE SCROLL DOWN UNTIL THE NEXT BLOCK OF CAPITALIZED COMMENTS.
@@ -321,13 +321,25 @@ tour_of_nearest_neighbour,tour_length_of_nearest_neighbour = basic_greedy()
 
 
 ####Parameters, user-defined####
-max_it = 200 #maximum number of iterations
+max_it = 1000 #maximum number of iterations
 N=num_cities#number of ants
 w=6
 row = 0.85 #pheromone decay rate
 tao_0 = w*(w-1)/(row*tour_length_of_nearest_neighbour) #initial pheromone deposit
 alpha = 1
 beta = 3
+
+######Change parameters according to size of input#####
+if N>300:
+    N=15
+elif N>200:
+    N=num_cities//10
+elif N>160:
+    N=num_cities//8
+elif N>130:
+    N=num_cities//4
+elif N>100:
+    N=num_cities//2
 
 
 added_note+=str(N)+' = number of ants, '+str(max_it)+' = maximum number of iterations, '+str(alpha)+' = alpha, '+str(beta)+' = beta, '+str(row)+' = row'+str(w)+' = w'
@@ -391,7 +403,11 @@ def probabilities_of_vertices(ant):
             continue
         else:
             ####the overall probability of each edge finally computed######
-            probabilities.append(probies[index]/sum_of_all)
+            if sum_of_all==0:#in that case all the probabilities in probies are zero as well
+                print("NULL------")
+                probabilities.append(1)
+            else:
+                probabilities.append(probies[index]/sum_of_all)
             index+=1
     return probabilities
 
@@ -407,6 +423,7 @@ def ant_colony_opt():
     ##reassignment as local variables to be able to change its values locally
     w_local=w
     row_local=row
+    stop_flag=0
     for t in range(max_it): ###maybe change max_it later to time.time
         #if t%2==0:
         #    w_local+=1 #w is better left without incrementing
@@ -432,7 +449,14 @@ def ant_colony_opt():
                     past = probabilities[0]
                     next_vertex = 0
                     best =  probabilities[0]
-                    if (t%2==0 and t<6) or (t>=6 and t%10==0):
+                    ######Try to make it so that every now and then only the best solution is chosen and randomness is eliminated####
+                    if num_cities>100:
+                        freq = 2
+                    elif num_cities>50:
+                        freq = 4
+                    else:
+                        freq = 10
+                    if (t%2==0 and t<6) or (t>=6 and t%freq==0) or (t%5 and t>20 and i%2==0):
                         index=0
                         first=0
                         for e in range(num_cities): #for all neighbouring vertices of i, compute next vertex probability
@@ -449,6 +473,22 @@ def ant_colony_opt():
                                     next_vertex=e
                                     best=probabilities[index]
                                 index+=1
+
+                    #####Try to make choosing the city more random#######
+                    #####but the results were actually worse#############
+                    #elif (t%5 and t>20 and i%10==0):
+                    #    num = random.randint(0,len(probabilities))
+                    #    for e in range(num_cities): #for all neighbouring vertices of i, compute next vertex probability
+                    #        if e == ant.current:
+                    #            continue
+                    #        elif e in ant.visited_vertices:
+                    #            continue
+                    #       else:
+                    #            if index==num:
+                    #                next_vertex = e
+                    #                break
+                    #            index+=1
+                    
                     #print('**',rand_float,'**')
                     #The probability of each vertex being selected next was computed, now the ant will randomly choose 
                     #which vertex to select according to the probabilities
@@ -474,6 +514,11 @@ def ant_colony_opt():
                     ant.current = next_vertex
             ant.path_cost+=dist_matrix[ant.current][ant.visited_vertices[0]]
             ant.visited.append([ant.current,ant.visited_vertices[0]])
+            print('-----')
+            if time.time()-starttime>300:
+                print('STOP')
+                stop_flag=1
+                break
             #print(ant.visited_vertices,ant.path_cost)
         #find ant with minimum path cost and compare with current best_tour path cost
         my_ants.sort(key=lambda ant:ant.path_cost)
@@ -514,6 +559,8 @@ def ant_colony_opt():
                     pheromone_matrix[i][j]+=(w_local*list_of_best_tour_pheromone_deposit[(i,j)])
                 except:
                     pheromone_matrix[i][j]=pheromone_matrix[i][j] 
+        if time.time()-starttime>300 or stop_flag==1:
+            return best_tour,best_tour_length
     return best_tour,best_tour_length
 
 #print(dist_matrix)
@@ -540,7 +587,7 @@ print('Time: ',endtime-starttime)
 ############
 ############ DO NOT TOUCH OR ALTER THE CODE BELOW THIS POINT! YOU HAVE BEEN WARNED!
 ############
-'''
+
 flag = "good"
 length = len(tour)
 for i in range(0, length):
@@ -593,7 +640,7 @@ f.write(",\nNOTE = " + added_note)
 f.close()
 print("I have successfully written your tour to the tour file:\n   " + output_file_name + ".")
     
-'''
+
 
 
 

@@ -402,6 +402,7 @@ def ant_colony_opt():
     for i in range(N):
         new_ant = Ant(i)
         my_ants.append(new_ant)
+    stop_flag=0
     for t in range(max_it): ###maybe change max_it later to time.time 
         #print(pheromone_matrix)
         for ant in my_ants:
@@ -444,6 +445,9 @@ def ant_colony_opt():
                     ant.current = next_vertex
             ant.path_cost+=dist_matrix[ant.current][ant.visited_vertices[0]]
             ant.visited.append([ant.current,ant.visited_vertices[0]])
+            if time.time()-starttime>55:
+                stop_flag=1
+                break
             #print(ant.visited_vertices,ant.path_cost)
         #find ant with minimum path cost and compare with current best_tour path cost
         min_path_cost=min(my_ants,key=lambda ant:ant.path_cost)
@@ -469,6 +473,8 @@ def ant_colony_opt():
                 except:
                     pheromone_matrix[i][j]= evap
         
+        if time.time()-starttime>55 or stop_flag==1:
+            return best_tour,best_tour_length
     return best_tour,best_tour_length
 
 #print(dist_matrix)
@@ -477,6 +483,7 @@ print(tour_of_nearest_neighbour,tour_length_of_nearest_neighbour)
 print(tour,tour_length)
 endtime=time.time()
 print('Time: ',endtime-starttime)
+
 
 ############
 ############ YOUR CODE SHOULD NOW BE COMPLETE AND WHEN EXECUTION OF THIS PROGRAM 'skeleton.py'

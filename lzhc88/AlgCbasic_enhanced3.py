@@ -509,18 +509,7 @@ def particle_swarm_opt():
                     theta =0.1
                     alpha = 1
                     beta=0.4
-            if a.best_tour_length==best_in_nhood.best_tour_length and len(a.velocity)>2:
-                new_velocity=a.velocity[:2]
-                #print(new_velocity)
-                a.tour,a.tour_length=add_velocity(a.tour,new_velocity)
-                if a.best_tour_length==-1:
-                    a.best_tour_length = length
-                    a.best_tour = a.tour.copy()
-                else:
-                    if a.tour_length<a.best_tour_length:
-                        a.best_tour_length = a.tour_length
-                        a.best_tour = a.tour.copy()
-            elif a.best_tour_length==best_in_nhood.best_tour_length and len(a.velocity)==0:
+            if a.best_tour_length==best_in_nhood.best_tour_length:
                 a.velocity=generate_random_velocity()
                 new_velocity=a.velocity[:2]
                 #print(new_velocity)

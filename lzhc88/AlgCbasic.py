@@ -284,6 +284,7 @@ added_note = ""
 starttime = time.time()  
 
 def generate_random_tour():
+    #make a list to cross off the cities that have been added
     to_visit = []
     for i in range(num_cities):
         to_visit.append(i)
@@ -291,10 +292,13 @@ def generate_random_tour():
     for i in range(num_cities):
         next_vertex = random.randint(0,num_cities-i-1)
         tour.append(to_visit[next_vertex])
-        to_visit.pop(next_vertex)
+        to_visit.pop(next_vertex)#delete city that has been added to tour
     return tour
 
 def all_possible_swaps():
+    #in bubble_sort
+    #there are n-1 times swaps of (0,1) ... and 1 swap of (n-1,n)
+    #it is necessary to add the right amount of swaps for each of (i,i+1) to get the right probability of each swap
     swaps = []
     for i in range(num_cities):
         for j in range(num_cities-i-1,0,-1):
@@ -305,10 +309,10 @@ def all_possible_swaps():
 all_swaps = all_possible_swaps()
 
 def generate_random_velocity():
-    max_number_of_swaps = (num_cities*(num_cities-1))/2
-    num_of_swaps = random.randint(0,max_number_of_swaps)
+    max_number_of_swaps = (num_cities*(num_cities-1))/2 #maximum number of swaps according to bubble_sort
+    num_of_swaps = random.randint(0,max_number_of_swaps)#random amount of swaps for each velocity
     swap_possibilities = all_swaps.copy()
-    swaps = []
+    swaps = []#choose however many swaps from swap_possibilities as num_of_swaps
     for i in range(num_of_swaps):
         choose_swap = random.randint(0, len(swap_possibilities)-1)
         swaps.append(swap_possibilities[choose_swap])
@@ -414,7 +418,7 @@ theta = 0.4 #inertia function: weight to be give to particle's current velocity
 alpha = 0.9 #cognitive learning factor: weight to be given to particle's own best position
 beta = 3 #social leraning factor: weight to be given to the particle's neighbourhood's best position
 
-def best_in_neighbourhood(particles,a):
+def best_in_neighbourhood(particles,a):#including a
     neighbourhood = [a]
     for p in particles:
         if p.ID == a.ID:

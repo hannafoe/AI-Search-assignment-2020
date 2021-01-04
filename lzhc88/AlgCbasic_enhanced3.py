@@ -282,7 +282,45 @@ added_note = ""
 ############ NOW YOUR CODE SHOULD BEGIN.
 ############
 starttime = time.time()  
+#####basic greedy algorithm##########################
+class Node:
+    def __init__(self,ID,state,action,path_cost):
+        self.ID=ID
+        self.state=state
+        self.action = action
+        self.path_cost = path_cost
 
+class State:
+    def __init__(self,partial_tour):
+        self.partial_tour=partial_tour
+    
+    def get(self):
+        return self.partial_tour
+    
+        
+def basic_greedy():
+    node = Node(0,State([0]),0,0)
+    path = [node.ID]
+    while len(path)!=num_cities:
+        successors = []
+        for i in range(1,num_cities):#all successors
+            if i==node.ID:
+                continue
+            if i in path:
+                continue
+            new_id = i
+            new_partial_tour=node.state.get().copy()
+            new_partial_tour.append(i)
+            new_state = State(new_partial_tour)
+            new_dist = dist_matrix[node.ID][i]
+            new_pathcost = node.path_cost+new_dist
+            new_node = Node(new_id,new_state,new_dist,new_pathcost)
+            successors.append(new_node)
+        node = min(successors,key=lambda node:node.action)
+        path.append(node.ID)
+    path_cost=node.path_cost+(dist_matrix[0][node.ID])
+    return path,path_cost
+#########################################
 def generate_random_tour():
     to_visit = []
     for i in range(num_cities):
@@ -407,7 +445,7 @@ def multiply(velocity, num): #num can be a float
 
 
 ###Parameters, user-defined####
-max_it = 60 #maximum number of iterations
+max_it = 20 #maximum number of iterations
 N=20 #number of particles
 delta = math.inf #neighbourhood
 theta = 0.01 #inertia function: weight to be give to particle's current velocity
@@ -436,7 +474,9 @@ def add_velocity(tour,velocity):
 
 def particle_swarm_opt():
     my_particles = []
-    for i in range(N):
+    tour_of_nearest_neighbour,tour_length_of_nearest_neighbour = basic_greedy()
+    my_particles.append(Particle(0,generate_random_velocity(),tour_of_nearest_neighbour))
+    for i in range(1,N):
         my_particles.append(Particle(i,generate_random_velocity(),generate_random_tour()))
     bestTour = min_tour(my_particles)
     #print(bestTour.best_tour,bestTour.best_tour_length,bestTour.tour,bestTour.tour_length,'\n')
@@ -444,20 +484,24 @@ def particle_swarm_opt():
     #for a in my_particles:
         #print(a.best_tour,a.best_tour_length,a.tour,a.tour_length)
     while t<max_it:
-        i=0
         for a in my_particles:
             best_in_nhood = best_in_neighbourhood(my_particles, a)
             current_tour = a.tour.copy()
-            if abs(a.tour_length-best_in_nhood.best_tour_length)>50:
+            #print(abs(a.tour_length-best_in_nhood.best_tour_length)>150 and a.ID%2==0,a.ID%2 ==0,a.ID%3==0)
+            if abs(a.tour_length-best_in_nhood.best_tour_length)>150 and a.ID%2==0:
                 theta = 0.2
                 alpha =0.1
                 beta=1
+            #elif a.best_tour_length==best_in_nhood.best_tour_length:
+            #    theta=0.1
+            #    alpha=0.0001
+            #    beta=0.0001
             else:
-                if i%2 ==0:
+                if a.ID%2 ==0:
                     theta =1.3
                     alpha = 1.9
                     beta=1.6
-                elif i%3==0:
+                elif a.ID%3==0:
                     theta =0.6
                     alpha = 1
                     beta=0.6
@@ -465,7 +509,32 @@ def particle_swarm_opt():
                     theta =0.1
                     alpha = 1
                     beta=0.4
-            a.add_velocity() #adding the velocity to the current tour to get new tour
+            if a.best_tour_length==best_in_nhood.best_tour_length and len(a.velocity)>2:
+                new_velocity=a.velocity[:2]
+                #print(new_velocity)
+                a.tour,a.tour_length=add_velocity(a.tour,new_velocity)
+                if a.best_tour_length==-1:
+                    a.best_tour_length = length
+                    a.best_tour = a.tour.copy()
+                else:
+                    if a.tour_length<a.best_tour_length:
+                        a.best_tour_length = a.tour_length
+                        a.best_tour = a.tour.copy()
+            elif a.best_tour_length==best_in_nhood.best_tour_length and len(a.velocity)==0:
+                a.velocity=generate_random_velocity()
+                new_velocity=a.velocity[:2]
+                #print(new_velocity)
+                a.tour,a.tour_length=add_velocity(a.tour,new_velocity)
+                if a.best_tour_length==-1:
+                    a.best_tour_length = length
+                    a.best_tour = a.tour.copy()
+                else:
+                    if a.tour_length<a.best_tour_length:
+                        a.best_tour_length = a.tour_length
+                        a.best_tour = a.tour.copy()
+            else:
+                #print(a.velocity)
+                a.add_velocity() #adding the velocity to the current tour to get new tour
             ####NORMALISE VELOCITY###
             a.velocity = distance(current_tour.copy(), a.tour.copy())
             #########################
@@ -489,13 +558,12 @@ def particle_swarm_opt():
             a.velocity = new_velocity
             #print(a.velocity)
             #print('-------')
-            i+=1
         #print()
-        '''
+        
         for a in my_particles:
             print(a.best_tour,a.best_tour_length,a.tour,a.tour_length)
         print()
-        '''
+        
         bestTour=min_tour(my_particles)
         #print(bestTour.best_tour,bestTour.best_tour_length,bestTour.tour,bestTour.tour_length)
         t+=1
@@ -610,17 +678,18 @@ for i in range(100):
     average+=tour_length
 average = average/100
 print(average)
-'''
+
 tours = []
-for i in range(10):
+for i in range(30):
     tour,tour_length = particle_swarm_opt()
     tours.append([tour,tour_length])
+tour,tour_length = min(tours, key=lambda tour:tour[1])
+print(tour,tour_length)
 '''
 tour,tour_length=particle_swarm_opt()
 print(tour,tour_length)
-'''
-tour,tour_length = min(tours, key=lambda tour:tour[1])
-print(tour,tour_length)
+
+
 endtime=time.time()
 print('Time: ',endtime-starttime)
 

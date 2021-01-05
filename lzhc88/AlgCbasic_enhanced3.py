@@ -525,7 +525,7 @@ def particle_swarm_opt():
             if len(a.velocity)<2:
                 a.velocity=generate_random_velocity()
             ########velocity correction option 1#######################################
-            if abs(a.tour_length-best_in_nhood.best_tour_length)>(abs(worstTour_length-bestTour.best_tour_length)//2) and a.ID%50==0:
+            if abs(a.tour_length-best_in_nhood.best_tour_length)>(abs(worstTour_length-bestTour.best_tour_length)//2) and a.ID%10==0:
                 ##In this case get back to vicinity of best in neigbourhood
                 new_velocity.extend(a.take(2))#adding two swaps of the former velocity (this is instead of theta)
                 ######Now add two swaps going to the vicinity of own best
@@ -572,7 +572,7 @@ def particle_swarm_opt():
         #print()
         bestTour=min_tour(my_particles)
         if time.time()-starttime>55 or stop_flag==1:
-            return best_tour,best_tour_length
+            return bestTour.best_tour,bestTour.best_tour_length
         t+=1
     print(bestTour.ID)
     return bestTour.best_tour,bestTour.best_tour_length

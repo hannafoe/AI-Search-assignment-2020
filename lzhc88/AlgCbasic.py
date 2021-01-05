@@ -474,7 +474,7 @@ def particle_swarm_opt():
                 break
         bestTour=min_tour(my_particles)
         if time.time()-starttime>55 or stop_flag==1:
-            return best_tour,best_tour_length
+            return bestTour.best_tour,bestTour.best_tour_length
         t+=1
     return bestTour.best_tour,bestTour.best_tour_length
 

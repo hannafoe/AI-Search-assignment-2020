@@ -153,7 +153,7 @@ def read_in_algorithm_codes_and_tariffs(alg_codes_file):
 ############ THE CITY FILE IS IN THE FOLDER 'city-files'.
 ############
 
-input_file = "AISearchfile048.txt"
+input_file = "AISearchfile180.txt"
 
 ############
 ############ PLEASE SCROLL DOWN UNTIL THE NEXT BLOCK OF CAPITALIZED COMMENTS.
@@ -412,18 +412,8 @@ def min_tour (particles):
     for particle in particles:
         calculate_tour_length(particle)
     return min(particles,key=lambda particle:particle.best_tour_length)
-'''
-def bubble_sort(tour):
-    for i in range(num_cities):
-        swapped = False
-        for j in range(0,num_cities-i-1):
-            if tour[j]>tour[j+1]:
-                tour[j],tour[j+1]=tour[j+1],tour[j]
-                swapped = True
-        if swapped==False:
-            break
-'''
-def distance(p1,p2): #distance of two tours from each other
+
+def distance(p1,p2): #distance of two tours from each other, a modified version of bubblesort
     swaps = []
     for i in range(num_cities):
         swapped = False
@@ -462,13 +452,14 @@ def take(velocity,num): #num is an integer,the number of switches in velocity
 
 ###Parameters, user-defined####
 max_it = 100 #maximum number of iterations
-N=100 #number of particles
+N=20 #number of particles
 delta = math.inf #neighbourhood
 theta = 0.2 #inertia function: weight to be give to particle's current velocity
 alpha = 0.3 #cognitive learning factor: weight to be given to particle's own best position
 beta = 1 #social leraning factor: weight to be given to the particle's neighbourhood's best position
 
 ####Change parameters to fit size of input#######
+'''
 if num_cities<20:
     N=100
 elif num_cities<40:
@@ -479,7 +470,7 @@ elif num_cities<80:
     N=20
 else:
     N=15
-
+'''
 
 def best_in_neighbourhood(particles,a):
     neighbourhood = [a]
@@ -525,7 +516,7 @@ def particle_swarm_opt():
             if len(a.velocity)<2:
                 a.velocity=generate_random_velocity()
             ########velocity correction option 1#######################################
-            if abs(a.tour_length-best_in_nhood.best_tour_length)>(abs(worstTour_length-bestTour.best_tour_length)//2) and a.ID%10==0:
+            if abs(a.tour_length-best_in_nhood.best_tour_length)>(abs(worstTour_length-bestTour.best_tour_length)//2):# and a.ID%10==0:
                 ##In this case get back to vicinity of best in neigbourhood
                 new_velocity.extend(a.take(2))#adding two swaps of the former velocity (this is instead of theta)
                 ######Now add two swaps going to the vicinity of own best
@@ -564,14 +555,15 @@ def particle_swarm_opt():
                 new_velocity.extend(multiply(dif_nhoodBest_aCurTour, (beta)))
                 a.velocity = new_velocity
             a.add_velocity() #adding the velocity to the current tour to get new tour
-            if time.time()-starttime>55:
+            if time.time()-starttime>600:
                 stop_flag=1
                 break
-        #for a in my_particles:
-        #    print(a.best_tour,a.best_tour_length,a.tour,a.tour_length)
-        #print()
+        print(time.time()-starttime)
+        for a in my_particles:
+            print(a.best_tour,a.best_tour_length,a.tour,a.tour_length)
+        print()
         bestTour=min_tour(my_particles)
-        if time.time()-starttime>55 or stop_flag==1:
+        if time.time()-starttime>600 or stop_flag==1:
             return bestTour.best_tour,bestTour.best_tour_length
         t+=1
     print(bestTour.ID)

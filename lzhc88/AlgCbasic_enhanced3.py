@@ -153,7 +153,7 @@ def read_in_algorithm_codes_and_tariffs(alg_codes_file):
 ############ THE CITY FILE IS IN THE FOLDER 'city-files'.
 ############
 
-input_file = "AISearchfile017.txt"
+input_file = "AISearchfile042.txt"
 
 ############
 ############ PLEASE SCROLL DOWN UNTIL THE NEXT BLOCK OF CAPITALIZED COMMENTS.
@@ -373,10 +373,10 @@ class Particle:
             
     def multiply(self,num): #num can be a float
         if num<1 and num>0:
-           k = math.floor(len(self.velocity)*num)
-           new_velocity = self.velocity.copy()
-           new_velocity = new_velocity[:k]
-           return new_velocity
+            k = math.floor(len(self.velocity)*num)
+            new_velocity = self.velocity.copy()
+            new_velocity = new_velocity[:k]
+            return new_velocity
         if num==1:
             return self.velocity
         if num>1:
@@ -384,6 +384,14 @@ class Particle:
             k = math.floor(len(self.velocity)*(num-int(num)))
             lst = self.velocity.copy()
             new_velocity.extend(lst[:k])
+            return new_velocity
+
+    def take(self,num): #num is an integer,the number of switches in velocity
+        if num>len(self.velocity):
+            return self.velocity
+        else:
+            new_velocity=self.velocity.copy()
+            new_velocity=new_velocity[:num]
             return new_velocity
 
 def calculate_tour_length(particle):
@@ -429,25 +437,32 @@ def distance(p1,p2): #distance of two tours from each other
     return swaps
 
 def multiply(velocity, num): #num can be a float
-        if num<1 and num>0:
-           k = math.floor(len(velocity)*num)
-           new_velocity = velocity.copy()
-           new_velocity = new_velocity[:k]
-           return new_velocity
-        if num==1:
-            return velocity
-        if num>1:
-            new_velocity=int(num)*velocity.copy()
-            k = math.floor(len(velocity)*(num-int(num)))
-            lst = velocity.copy()
-            new_velocity.extend(lst[:k])
-            return new_velocity
-    
+    if num<1 and num>0:
+        k = math.floor(len(velocity)*num)
+        new_velocity = velocity.copy()
+        new_velocity = new_velocity[:k]
+        return new_velocity
+    if num==1:
+        return velocity
+    if num>1:
+        new_velocity=int(num)*velocity.copy()
+        k = math.floor(len(velocity)*(num-int(num)))
+        lst = velocity.copy()
+        new_velocity.extend(lst[:k])
+        return new_velocity
+
+def take(velocity,num): #num is an integer,the number of switches in velocity
+    if num>len(velocity):
+        return velocity
+    else:
+        new_velocity=velocity.copy()
+        new_velocity=new_velocity[:num]
+        return new_velocity
 
 
 ###Parameters, user-defined####
-max_it = 10 #maximum number of iterations
-N=5 #number of particles
+max_it = 100 #maximum number of iterations
+N=100 #number of particles
 delta = math.inf #neighbourhood
 theta = 0.01 #inertia function: weight to be give to particle's current velocity
 alpha = 1 #cognitive learning factor: weight to be given to particle's own best position
@@ -484,107 +499,81 @@ def particle_swarm_opt():
     my_particles.sort(key=lambda particle:particle.best_tour_length)
     bestTour = my_particles[0]
     worstTour_length = my_particles[N-1].tour_length
-    #print(bestTour.best_tour,bestTour.best_tour_length,bestTour.tour,bestTour.tour_length,'\n')
+    #print(abs(worstTour_length-bestTour.best_tour_length)//10)
     t = 0
-    #for a in my_particles:
-        #print(a.best_tour,a.best_tour_length,a.tour,a.tour_length)
     while t<max_it:
         for a in my_particles:
             best_in_nhood = best_in_neighbourhood(my_particles, a)
             current_tour = a.tour.copy()
-            if a.best_tour_length==best_in_nhood.best_tour_length:
-                a.count+=1
-            if a.best_tour_length==best_in_nhood.best_tour_length and a.count>=0 and a.count<6:
-                print(a.ID,t)
-                new_velocity=[]
-                for i in range(2):
-                    choose_swap = random.randint(0, len(all_swaps)-1)
-                    new_velocity.append(all_swaps[choose_swap])
-                print(new_velocity)
-                a.tour,a.tour_length=add_velocity(a.tour,new_velocity)
-                if a.best_tour_length==-1:
-                    a.best_tour_length = length
-                    a.best_tour = a.tour.copy()
-                else:
-                    if a.tour_length<a.best_tour_length:
-                        a.best_tour_length = a.tour_length
-                        a.best_tour = a.tour.copy()
-                a.count+=1
-            else:
-                print(a.velocity)
-                a.add_velocity() #adding the velocity to the current tour to get new tour
-            #print(abs(a.tour_length-best_in_nhood.best_tour_length)>150 and a.ID%2==0,a.ID%2 ==0,a.ID%3==0)
-            if len(a.velocity)<2 or a.count==6:
-                print("---",a.ID,t)
-                a.velocity=generate_random_velocity
-                if a.count==6:
-                    a.count+=1
-            if abs(a.tour_length-best_in_nhood.best_tour_length)>(abs(worstTour_length-bestTour.best_tour_length)//2) and a.ID%2==0:
-                print('HHHH',a.ID,t)
-                theta = 0.2
-                alpha =0.2
-                beta=1
-            #elif a.best_tour_length==best_in_nhood.best_tour_length:
-            #    theta=0.1
-            #    alpha=0.0001
-            #    beta=0.0001
+            ####NORMALISE VELOCITY###
+            a.velocity = distance(current_tour.copy(), a.tour.copy())
+            #########################
+            new_velocity = []
+            if len(a.velocity)<2:
+                a.velocity=generate_random_velocity()
+            ########velocity correction option 1#######################################
+            if abs(a.tour_length-best_in_nhood.best_tour_length)>(abs(worstTour_length-bestTour.best_tour_length)//2) and a.ID%50==0:
+                ##In this case get back to vicinity of best in neigbourhood
+                new_velocity.extend(a.take(2))#adding two swaps of the former velocity (this is instead of theta)
+                ######Now add two swaps going to the vicinity of own best
+                dif_aBestTour_aCurTour = distance(a.tour.copy(),a.best_tour.copy()) #difference of a's best tour-a' current tour
+                new_velocity.extend(take(dif_aBestTour_aCurTour,3))
+                ######Now add the velocity to get to the vicinity of the best tour in neighbourhood######
+                dif_nhoodBest_aCurTour = distance(a.tour.copy(),best_in_nhood.best_tour.copy())
+                new_velocity.extend(dif_nhoodBest_aCurTour)
+                a.velocity = new_velocity
+            #######velocity correction option 2######################################
             elif abs(a.tour_length-a.best_tour_length)>(abs(worstTour_length-bestTour.best_tour_length)//8):
-                print('sss',a.ID,t)
-                theta=0.4
-                alpha=1.3
-                beta=0.4
+                ##In this case get back to vicinity of own best###
+                new_velocity.extend(a.take(1))#adding two swaps of the former velocity (this is instead of theta)
+                ######Now add the velocity to get to the vicinity of own best tour
+                dif_aBestTour_aCurTour = distance(a.tour.copy(),a.best_tour.copy()) #difference of a's best tour-a' current tour
+                new_velocity.extend(dif_aBestTour_aCurTour)
+                ######Now add two swaps going to the vicinity of best tour in neighbourhood#####
+                dif_nhoodBest_aCurTour = distance(a.tour.copy(),best_in_nhood.best_tour.copy())
+                new_velocity.extend(take(dif_nhoodBest_aCurTour,1))
+                a.velocity = new_velocity
+            elif abs(a.tour_length-bestTour.best_tour_length)<(abs(worstTour_length-bestTour.best_tour_length)//10):
+                new_velocity.extend(a.take(1))#adding two swaps of the former velocity (this is instead of theta)
+                a.velocity = new_velocity
             else:
-                if a.ID%2 == 0:
-                    theta = 1.3
-                    alpha = 1.9
-                    beta = 1.6
+                theta = 0.2
+                alpha = 0.3
+                beta = 1
+                '''
+                elif a.ID%2 == 0:
+                    theta = 0.6
+                    alpha = 1
+                    beta = 0.6
                 elif a.ID%3==0:
                     theta =0.6
                     alpha = 1
                     beta=0.6
                 else:
-                    theta =0.1
+                    theta =0.6
                     alpha = 1
-                    beta=0.4
-            ####NORMALISE VELOCITY###
-            a.velocity = distance(current_tour.copy(), a.tour.copy())
-            #########################
-            new_velocity = []
-            new_velocity.extend(a.multiply(theta))#adding the former velocity with weight theta
-            print(new_velocity,"velocity for next round with theta")
-            #calculate weight of particle's own position in new_velocity
-            #print(new_velocity)
-            dif_aBestTour_aCurTour = distance(a.tour.copy(),a.best_tour.copy()) #difference of a's best tour-a' current tour
-            #component-wise multiplication of epsilon*dif_aBestTour_aCurTour, 
-            #each component of epsilon is a random number between 0 and 1
-            #multiply random float in range (0,1) (-> epsilon) with dif_aBestTour_aCurTour
-            #epsilon = random.random()+1
-            #print(epsilon*alpha)
-            new_velocity.extend(multiply(dif_aBestTour_aCurTour,(alpha)))
-            print(new_velocity,"velocity for next round with alpha")
-            #print(new_velocity)
-            dif_nhoodBest_aCurTour = distance(a.tour.copy(),best_in_nhood.best_tour.copy())
-            #epsilon_p = random.random()+1
-            #print(epsilon_p*beta)
-            new_velocity.extend(multiply(dif_nhoodBest_aCurTour, (beta)))
-            print(new_velocity,"velocity for next round with beta")
-            #print(new_velocity)
-            a.velocity = new_velocity
-            #print(a.velocity)
-            #print('-------')
+                    beta=0.6
+                '''
+                new_velocity.extend(a.multiply(theta))#adding the former velocity with weight theta
+                #calculate weight of particle's own position in new_velocity
+                dif_aBestTour_aCurTour = distance(a.tour.copy(),a.best_tour.copy()) #difference of a's best tour-a' current tour
+                #component-wise multiplication of epsilon*dif_aBestTour_aCurTour, 
+                #each component of epsilon is a random number between 0 and 1
+                #multiply random float in range (0,1) (-> epsilon) with dif_aBestTour_aCurTour
+                #epsilon = random.random()+1
+                new_velocity.extend(multiply(dif_aBestTour_aCurTour,(alpha)))
+                #print(new_velocity)
+                dif_nhoodBest_aCurTour = distance(a.tour.copy(),best_in_nhood.best_tour.copy())
+                #epsilon_p = random.random()+1
+                new_velocity.extend(multiply(dif_nhoodBest_aCurTour, (beta)))
+                a.velocity = new_velocity
+            a.add_velocity() #adding the velocity to the current tour to get new tour
+        #for a in my_particles:
+        #    print(a.best_tour,a.best_tour_length,a.tour,a.tour_length)
         #print()
-        
-        for a in my_particles:
-            print(a.best_tour,a.best_tour_length,a.tour,a.tour_length)
-        print()
-        oldBest=bestTour
         bestTour=min_tour(my_particles)
-        if oldBest.best_tour_length!=bestTour.best_tour_length:#restart the count again
-            for a in my_particles:
-                a.count=-1
-        #print(bestTour.best_tour,bestTour.best_tour_length,bestTour.tour,bestTour.tour_length)
         t+=1
-        #print('----------------')
+    print(bestTour.ID)
     return bestTour.best_tour,bestTour.best_tour_length
 
 ##parameter test function###
@@ -727,7 +716,7 @@ print('Time: ',endtime-starttime)
 ############
 ############ DO NOT TOUCH OR ALTER THE CODE BELOW THIS POINT! YOU HAVE BEEN WARNED!
 ############
-'''
+
 flag = "good"
 length = len(tour)
 for i in range(0, length):
@@ -780,7 +769,7 @@ f.write(",\nNOTE = " + added_note)
 f.close()
 print("I have successfully written your tour to the tour file:\n   " + output_file_name + ".")
     
-'''
+
 
 
 

@@ -362,6 +362,7 @@ class Particle:
         self.tour_length = -1
         self.best_tour = []
         self.best_tour_length = -1
+        self.count=-1
     
     def add_velocity(self):
         for swap in self.velocity:
@@ -445,8 +446,8 @@ def multiply(velocity, num): #num can be a float
 
 
 ###Parameters, user-defined####
-max_it = 20 #maximum number of iterations
-N=20 #number of particles
+max_it = 10 #maximum number of iterations
+N=5 #number of particles
 delta = math.inf #neighbourhood
 theta = 0.01 #inertia function: weight to be give to particle's current velocity
 alpha = 1 #cognitive learning factor: weight to be given to particle's own best position
@@ -478,7 +479,11 @@ def particle_swarm_opt():
     my_particles.append(Particle(0,generate_random_velocity(),tour_of_nearest_neighbour))
     for i in range(1,N):
         my_particles.append(Particle(i,generate_random_velocity(),generate_random_tour()))
-    bestTour = min_tour(my_particles)
+    for particle in my_particles:
+        calculate_tour_length(particle)
+    my_particles.sort(key=lambda particle:particle.best_tour_length)
+    bestTour = my_particles[0]
+    worstTour_length = my_particles[N-1].tour_length
     #print(bestTour.best_tour,bestTour.best_tour_length,bestTour.tour,bestTour.tour_length,'\n')
     t = 0
     #for a in my_particles:
@@ -487,32 +492,15 @@ def particle_swarm_opt():
         for a in my_particles:
             best_in_nhood = best_in_neighbourhood(my_particles, a)
             current_tour = a.tour.copy()
-            #print(abs(a.tour_length-best_in_nhood.best_tour_length)>150 and a.ID%2==0,a.ID%2 ==0,a.ID%3==0)
-            if abs(a.tour_length-best_in_nhood.best_tour_length)>150 and a.ID%2==0:
-                theta = 0.2
-                alpha =0.1
-                beta=1
-            #elif a.best_tour_length==best_in_nhood.best_tour_length:
-            #    theta=0.1
-            #    alpha=0.0001
-            #    beta=0.0001
-            else:
-                if a.ID%2 ==0:
-                    theta =1.3
-                    alpha = 1.9
-                    beta=1.6
-                elif a.ID%3==0:
-                    theta =0.6
-                    alpha = 1
-                    beta=0.6
-                else:
-                    theta =0.1
-                    alpha = 1
-                    beta=0.4
             if a.best_tour_length==best_in_nhood.best_tour_length:
-                a.velocity=generate_random_velocity()
-                new_velocity=a.velocity[:2]
-                #print(new_velocity)
+                a.count+=1
+            if a.best_tour_length==best_in_nhood.best_tour_length and a.count>=0 and a.count<6:
+                print(a.ID,t)
+                new_velocity=[]
+                for i in range(2):
+                    choose_swap = random.randint(0, len(all_swaps)-1)
+                    new_velocity.append(all_swaps[choose_swap])
+                print(new_velocity)
                 a.tour,a.tour_length=add_velocity(a.tour,new_velocity)
                 if a.best_tour_length==-1:
                     a.best_tour_length = length
@@ -521,14 +509,49 @@ def particle_swarm_opt():
                     if a.tour_length<a.best_tour_length:
                         a.best_tour_length = a.tour_length
                         a.best_tour = a.tour.copy()
+                a.count+=1
             else:
-                #print(a.velocity)
+                print(a.velocity)
                 a.add_velocity() #adding the velocity to the current tour to get new tour
+            #print(abs(a.tour_length-best_in_nhood.best_tour_length)>150 and a.ID%2==0,a.ID%2 ==0,a.ID%3==0)
+            if len(a.velocity)<2 or a.count==6:
+                print("---",a.ID,t)
+                a.velocity=generate_random_velocity
+                if a.count==6:
+                    a.count+=1
+            if abs(a.tour_length-best_in_nhood.best_tour_length)>(abs(worstTour_length-bestTour.best_tour_length)//2) and a.ID%2==0:
+                print('HHHH',a.ID,t)
+                theta = 0.2
+                alpha =0.2
+                beta=1
+            #elif a.best_tour_length==best_in_nhood.best_tour_length:
+            #    theta=0.1
+            #    alpha=0.0001
+            #    beta=0.0001
+            elif abs(a.tour_length-a.best_tour_length)>(abs(worstTour_length-bestTour.best_tour_length)//8):
+                print('sss',a.ID,t)
+                theta=0.4
+                alpha=1.3
+                beta=0.4
+            else:
+                if a.ID%2 == 0:
+                    theta = 1.3
+                    alpha = 1.9
+                    beta = 1.6
+                elif a.ID%3==0:
+                    theta =0.6
+                    alpha = 1
+                    beta=0.6
+                else:
+                    theta =0.1
+                    alpha = 1
+                    beta=0.4
             ####NORMALISE VELOCITY###
             a.velocity = distance(current_tour.copy(), a.tour.copy())
             #########################
             new_velocity = []
             new_velocity.extend(a.multiply(theta))#adding the former velocity with weight theta
+            print(new_velocity,"velocity for next round with theta")
             #calculate weight of particle's own position in new_velocity
             #print(new_velocity)
             dif_aBestTour_aCurTour = distance(a.tour.copy(),a.best_tour.copy()) #difference of a's best tour-a' current tour
@@ -538,11 +561,13 @@ def particle_swarm_opt():
             #epsilon = random.random()+1
             #print(epsilon*alpha)
             new_velocity.extend(multiply(dif_aBestTour_aCurTour,(alpha)))
+            print(new_velocity,"velocity for next round with alpha")
             #print(new_velocity)
             dif_nhoodBest_aCurTour = distance(a.tour.copy(),best_in_nhood.best_tour.copy())
             #epsilon_p = random.random()+1
             #print(epsilon_p*beta)
             new_velocity.extend(multiply(dif_nhoodBest_aCurTour, (beta)))
+            print(new_velocity,"velocity for next round with beta")
             #print(new_velocity)
             a.velocity = new_velocity
             #print(a.velocity)
@@ -552,8 +577,11 @@ def particle_swarm_opt():
         for a in my_particles:
             print(a.best_tour,a.best_tour_length,a.tour,a.tour_length)
         print()
-        
+        oldBest=bestTour
         bestTour=min_tour(my_particles)
+        if oldBest.best_tour_length!=bestTour.best_tour_length:#restart the count again
+            for a in my_particles:
+                a.count=-1
         #print(bestTour.best_tour,bestTour.best_tour_length,bestTour.tour,bestTour.tour_length)
         t+=1
         #print('----------------')

@@ -443,10 +443,8 @@ def particle_swarm_opt():
     for i in range(N):
         my_particles.append(Particle(i,generate_random_velocity(),generate_random_tour()))
     bestTour = min_tour(my_particles)
-    print(bestTour.best_tour,bestTour.best_tour_length,bestTour.tour,bestTour.tour_length,'\n')
     t = 0
-    for a in my_particles:
-        print(a.best_tour,a.best_tour_length,a.tour,a.tour_length)
+    stop_flag=0
     while t<max_it:
         for a in my_particles:
             best_in_nhood = best_in_neighbourhood(my_particles, a)
@@ -471,15 +469,13 @@ def particle_swarm_opt():
             if a.best_tour_length>a.tour_length:
                 a.best_tour_length=a.tour_length
                 a.best_tour=a.tour.copy()
-                print('x')
-        print()
-        for a in my_particles:
-            print(a.best_tour,a.best_tour_length,a.tour,a.tour_length)
-        print()
+            if time.time()-starttime>55:
+                stop_flag=1
+                break
         bestTour=min_tour(my_particles)
-        print(bestTour.best_tour,bestTour.best_tour_length,bestTour.tour,bestTour.tour_length)
+        if time.time()-starttime>55 or stop_flag==1:
+            return best_tour,best_tour_length
         t+=1
-        print('----------------')
     return bestTour.best_tour,bestTour.best_tour_length
 
 

@@ -452,11 +452,11 @@ def take(velocity,num): #num is an integer,the number of switches in velocity
 
 ###Parameters, user-defined####
 max_it = 100 #maximum number of iterations
-N=20 #number of particles
+N=30 #number of particles
 delta = math.inf #neighbourhood
-theta = 0.2 #inertia function: weight to be give to particle's current velocity
-alpha = 0.3 #cognitive learning factor: weight to be given to particle's own best position
-beta = 1 #social leraning factor: weight to be given to the particle's neighbourhood's best position
+theta = 0.6 #inertia function: weight to be give to particle's current velocity
+alpha = 0.6 #cognitive learning factor: weight to be given to particle's own best position
+beta = 1.2 #social leraning factor: weight to be given to the particle's neighbourhood's best position
 
 ####Change parameters to fit size of input#######
 '''
@@ -509,38 +509,69 @@ def particle_swarm_opt():
         for a in my_particles:
             best_in_nhood = best_in_neighbourhood(my_particles, a)
             current_tour = a.tour.copy()
-            ####NORMALISE VELOCITY###
-            a.velocity = distance(current_tour.copy(), a.tour.copy())
-            #########################
             new_velocity = []
             if len(a.velocity)<2:
                 a.velocity=generate_random_velocity()
             ########velocity correction option 1#######################################
-            if abs(a.tour_length-best_in_nhood.best_tour_length)>(abs(worstTour_length-bestTour.best_tour_length)//2):# and a.ID%10==0:
+            if (abs(a.tour_length-best_in_nhood.best_tour_length)>(abs(worstTour_length-bestTour.best_tour_length)//2) or a.best_tour_length>10*bestTour.best_tour_length) and a.ID%2==0:
                 ##In this case get back to vicinity of best in neigbourhood
                 new_velocity.extend(a.take(2))#adding two swaps of the former velocity (this is instead of theta)
+                ####################################################################################
+                #This takes too much extra time and does not change much#
                 ######Now add two swaps going to the vicinity of own best
-                dif_aBestTour_aCurTour = distance(a.tour.copy(),a.best_tour.copy()) #difference of a's best tour-a' current tour
-                new_velocity.extend(take(dif_aBestTour_aCurTour,3))
+                #dif_aBestTour_aCurTour = distance(a.tour.copy(),a.best_tour.copy()) #difference of a's best tour-a' current tour
+                #new_velocity.extend(take(dif_aBestTour_aCurTour,2))
+                #####################################################################################
                 ######Now add the velocity to get to the vicinity of the best tour in neighbourhood######
                 dif_nhoodBest_aCurTour = distance(a.tour.copy(),best_in_nhood.best_tour.copy())
-                new_velocity.extend(dif_nhoodBest_aCurTour)
+                new_velocity.extend(take(dif_nhoodBest_aCurTour,len(dif_nhoodBest_aCurTour)-2))
+                #add two extra random swaps
+                for i in range(2):
+                    choose_swap = random.randint(0, len(all_swaps)-1)
+                    new_velocity.append(all_swaps[choose_swap])
+                a.velocity = new_velocity
+            elif (abs(a.tour_length-best_in_nhood.best_tour_length)>(abs(worstTour_length-bestTour.best_tour_length)//2) or a.best_tour_length>10*bestTour.best_tour_length):
+                ##In this case get back to vicinity of best in neigbourhood
+                new_velocity.extend(a.take(2))#adding two swaps of the former velocity (this is instead of theta)
+                ####################################################################################
+                #This takes too much extra time and does not change much#
+                ######Now add two swaps going to the vicinity of own best
+                #dif_aBestTour_aCurTour = distance(a.tour.copy(),a.best_tour.copy()) #difference of a's best tour-a' current tour
+                #new_velocity.extend(take(dif_aBestTour_aCurTour,2))
+                #####################################################################################
+                ######Now add the velocity to get to the vicinity of the best tour in neighbourhood######
+                dif_nhoodBest_aCurTour = distance(a.tour.copy(),best_in_nhood.best_tour.copy())
+                new_velocity.extend(take(dif_nhoodBest_aCurTour,int(0.9*len(dif_nhoodBest_aCurTour))))
+                #add two extra random swaps
+                for i in range(2):
+                    choose_swap = random.randint(0, len(all_swaps)-1)
+                    new_velocity.append(all_swaps[choose_swap])
                 a.velocity = new_velocity
             #######velocity correction option 2######################################
-            elif abs(a.tour_length-a.best_tour_length)>(abs(worstTour_length-bestTour.best_tour_length)//8):
+            elif a.tour_length>2*a.best_tour_length:
                 ##In this case get back to vicinity of own best###
-                new_velocity.extend(a.take(1))#adding two swaps of the former velocity (this is instead of theta)
+                new_velocity.extend(a.take(2))#adding two swaps of the former velocity (this is instead of theta)
                 ######Now add the velocity to get to the vicinity of own best tour
                 dif_aBestTour_aCurTour = distance(a.tour.copy(),a.best_tour.copy()) #difference of a's best tour-a' current tour
-                new_velocity.extend(dif_aBestTour_aCurTour)
-                ######Now add two swaps going to the vicinity of best tour in neighbourhood#####
-                dif_nhoodBest_aCurTour = distance(a.tour.copy(),best_in_nhood.best_tour.copy())
-                new_velocity.extend(take(dif_nhoodBest_aCurTour,1))
+                new_velocity.extend(take(dif_aBestTour_aCurTour,len(dif_aBestTour_aCurTour)-2))
+                ###############################################################################
+                #This takes too much extra time, rather just add two random swaps#
+                ###Now add two swaps going to the vicinity of best tour in neighbourhood#####
+                #dif_nhoodBest_aCurTour = distance(a.tour.copy(),best_in_nhood.best_tour.copy())
+                #new_velocity.extend(take(dif_nhoodBest_aCurTour,2))
+                ##################################################################################
+                #add two extra random swaps
+                for i in range(2):
+                    choose_swap = random.randint(0, len(all_swaps)-1)
+                    new_velocity.append(all_swaps[choose_swap])
                 a.velocity = new_velocity
-            elif abs(a.tour_length-bestTour.best_tour_length)<(abs(worstTour_length-bestTour.best_tour_length)//10):
-                new_velocity.extend(a.take(1))#adding two swaps of the former velocity (this is instead of theta)
+            elif a.tour_length<1.2*a.best_tour_length:
+                ####to look in the vicinity only make small changes##########
+                for i in range(2):
+                    choose_swap = random.randint(0, len(all_swaps)-1)
+                    new_velocity.append(all_swaps[choose_swap])
                 a.velocity = new_velocity
-            else:
+            else:#######the normal case, with big velocity, and big changes, this is the chance to find new sequences that are minimal in tour length#####
                 new_velocity.extend(a.multiply(theta))#adding the former velocity with weight theta
                 #calculate weight of particle's own position in new_velocity
                 dif_aBestTour_aCurTour = distance(a.tour.copy(),a.best_tour.copy()) #difference of a's best tour-a' current tour
@@ -555,15 +586,18 @@ def particle_swarm_opt():
                 new_velocity.extend(multiply(dif_nhoodBest_aCurTour, (beta)))
                 a.velocity = new_velocity
             a.add_velocity() #adding the velocity to the current tour to get new tour
-            if time.time()-starttime>600:
+            if time.time()-starttime>1000:
                 stop_flag=1
                 break
+            ####NORMALISE VELOCITY###
+            a.velocity = distance(current_tour.copy(), a.tour.copy())
+            #########################
         print(time.time()-starttime)
         for a in my_particles:
             print(a.best_tour,a.best_tour_length,a.tour,a.tour_length)
         print()
         bestTour=min_tour(my_particles)
-        if time.time()-starttime>600 or stop_flag==1:
+        if time.time()-starttime>1000 or stop_flag==1:
             return bestTour.best_tour,bestTour.best_tour_length
         t+=1
     print(bestTour.ID)

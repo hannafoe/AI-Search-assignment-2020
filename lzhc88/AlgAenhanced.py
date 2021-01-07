@@ -145,7 +145,7 @@ def read_in_algorithm_codes_and_tariffs(alg_codes_file):
 ############ THE CITY FILE IS IN THE FOLDER 'city-files'.
 ############
 
-input_file = "AISearchfile058.txt"
+input_file = "AISearchfile012.txt"
 
 ############
 ############ PLEASE SCROLL DOWN UNTIL THE NEXT BLOCK OF CAPITALIZED COMMENTS.
@@ -321,7 +321,7 @@ tour_of_nearest_neighbour,tour_length_of_nearest_neighbour = basic_greedy()
 
 
 ####Parameters, user-defined####
-max_it = 10000 #maximum number of iterations
+max_it = 1000 #maximum number of iterations
 N=num_cities#number of ants
 w=6
 row = 0.85 #pheromone decay rate
@@ -330,19 +330,21 @@ alpha = 1
 beta = 3
 
 ######Change parameters according to size of input#####
+
 if N>300:
-    N=15
+    N=5
 elif N>200:
-    N=num_cities//10
+    N=15
 elif N>160:
     N=num_cities//8
 elif N>130:
+    N=num_cities//6
+elif N>80:
     N=num_cities//4
-elif N>100:
+elif N>40:
     N=num_cities//2
 
 
-added_note+=str(N)+' = number of ants, '+str(max_it)+' = maximum number of iterations, '+str(alpha)+' = alpha, '+str(beta)+' = beta, '+str(row)+' = row'+str(w)+' = w'
 
 ####helpful structures####
 class Ant:
@@ -545,7 +547,7 @@ def ant_colony_opt():
                     ant.current = next_vertex
             ant.path_cost+=dist_matrix[ant.current][ant.visited_vertices[0]]
             ant.visited.append([ant.current,ant.visited_vertices[0]])
-            if time.time()-starttime>400:
+            if time.time()-starttime>50:
                 stop_flag=1
                 break
             #print(ant.visited_vertices,ant.path_cost)
@@ -588,16 +590,16 @@ def ant_colony_opt():
                     pheromone_matrix[i][j]+=(w_local*list_of_best_tour_pheromone_deposit[(i,j)])
                 except:
                     pheromone_matrix[i][j]=pheromone_matrix[i][j] 
-        if time.time()-starttime>400 or stop_flag==1:
+        if time.time()-starttime>50 or stop_flag==1:
             return best_tour,best_tour_length
     return best_tour,best_tour_length
 
 #print(dist_matrix)
 tour,tour_length=ant_colony_opt()
-print(tour_of_nearest_neighbour,tour_length_of_nearest_neighbour)
-print(tour,tour_length)
+#print(tour_of_nearest_neighbour,tour_length_of_nearest_neighbour)
+#print(tour,tour_length)
 endtime=time.time()
-print('Time: ',endtime-starttime)
+#print('Time: ',endtime-starttime)
 
 ############
 ############ YOUR CODE SHOULD NOW BE COMPLETE AND WHEN EXECUTION OF THIS PROGRAM 'skeleton.py'

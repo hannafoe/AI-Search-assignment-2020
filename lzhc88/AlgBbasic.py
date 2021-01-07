@@ -369,17 +369,7 @@ def min_tour (particles):
     for particle in particles:
         calculate_tour_length(particle)
     return min(particles,key=lambda particle:particle.best_tour_length)
-'''
-def bubble_sort(tour):
-    for i in range(num_cities):
-        swapped = False
-        for j in range(0,num_cities-i-1):
-            if tour[j]>tour[j+1]:
-                tour[j],tour[j+1]=tour[j+1],tour[j]
-                swapped = True
-        if swapped==False:
-            break
-'''
+
 def distance(p1,p2): #distance of two tours from each other
     swaps = []
     for i in range(num_cities):
@@ -411,12 +401,25 @@ def multiply(velocity, num): #num can be a float
 
 
 ###Parameters, user-defined####
-max_it = 20 #maximum number of iterations
-N= 5 #number of particles
+max_it = 1000 #maximum number of iterations
+N= 10 #number of particles
 delta = math.inf #neighbourhood
 theta = 0.4 #inertia function: weight to be give to particle's current velocity
 alpha = 0.9 #cognitive learning factor: weight to be given to particle's own best position
 beta = 3 #social leraning factor: weight to be given to the particle's neighbourhood's best position
+
+####Change parameters to fit size of input#######
+
+if num_cities<20:
+    N=100
+elif num_cities<40:
+    N=50
+elif num_cities<60:
+    N=25
+elif num_cities<80:
+    N=20
+else:
+    N=10
 
 def best_in_neighbourhood(particles,a):#including a
     neighbourhood = [a]
@@ -426,7 +429,7 @@ def best_in_neighbourhood(particles,a):#including a
         if len(distance(a.tour.copy(),p.tour.copy()))<=delta:
             neighbourhood.append(p)
     return min(neighbourhood,key=lambda particle:particle.best_tour_length)
-'''
+
 def add_velocity(tour,velocity):
     for swap in velocity:
         i,j = swap
@@ -436,7 +439,7 @@ def add_velocity(tour,velocity):
         length+=dist_matrix[tour[i]][tour[i+1]]
     length+=dist_matrix[(tour[len(tour)-1])][(tour[0])]
     return tour,length
-'''##just a check help function
+##just a check help function
 
 def particle_swarm_opt():
     my_particles = []
@@ -469,21 +472,21 @@ def particle_swarm_opt():
             if a.best_tour_length>a.tour_length:
                 a.best_tour_length=a.tour_length
                 a.best_tour=a.tour.copy()
-            if time.time()-starttime>55:
+            if time.time()-starttime>50:
                 stop_flag=1
                 break
         bestTour=min_tour(my_particles)
-        if time.time()-starttime>55 or stop_flag==1:
+        if time.time()-starttime>50 or stop_flag==1:
             return bestTour.best_tour,bestTour.best_tour_length
         t+=1
     return bestTour.best_tour,bestTour.best_tour_length
 
 
 tour,tour_length=particle_swarm_opt()
-print(tour,tour_length)
+#print(tour,tour_length)
 
 endtime=time.time()
-print('Time: ',endtime-starttime)
+#print('Time: ',endtime-starttime)
 
 ############
 ############ YOUR CODE SHOULD NOW BE COMPLETE AND WHEN EXECUTION OF THIS PROGRAM 'skeleton.py'

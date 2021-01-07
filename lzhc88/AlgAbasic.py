@@ -145,7 +145,7 @@ def read_in_algorithm_codes_and_tariffs(alg_codes_file):
 ############ THE CITY FILE IS IN THE FOLDER 'city-files'.
 ############
 
-input_file = "AISearchfile175.txt"
+input_file = "AISearchfile012.txt"
 
 ############
 ############ PLEASE SCROLL DOWN UNTIL THE NEXT BLOCK OF CAPITALIZED COMMENTS.
@@ -328,7 +328,20 @@ row = 0.5 #pheromone decay rate
 alpha = 1
 beta = 3
 
-added_note+=str(N)+' = number of ants, '+str(max_it)+' = maximum number of iterations, '+str(alpha)+' = alpha, '+str(beta)+' = beta, '+str(row)+' = row'
+######Change parameters according to size of input#####
+if N>300:
+    N=5
+elif N>200:
+    N=15
+elif N>160:
+    N=num_cities//8
+elif N>130:
+    N=num_cities//6
+elif N>80:
+    N=num_cities//4
+elif N>40:
+    N=num_cities//2
+
 
 ####helpful structures####
 class Ant:
@@ -480,7 +493,7 @@ def ant_colony_opt():
                     ant.current = next_vertex
             ant.path_cost+=dist_matrix[ant.current][ant.visited_vertices[0]]
             ant.visited.append([ant.current,ant.visited_vertices[0]])
-            if time.time()-starttime>55:
+            if time.time()-starttime>50:
                 stop_flag=1
                 break
             #print(ant.visited_vertices,ant.path_cost)
@@ -490,7 +503,6 @@ def ant_colony_opt():
             best_tour = min_path_cost.visited_vertices
             best_tour_length = min_path_cost.path_cost
         ##deposit,evaporate pheromone on edges
-        #print('--------------')
         list_of_pheromone_deposit = {}
         for ant in my_ants:
             for edge in ant.visited:
@@ -508,16 +520,16 @@ def ant_colony_opt():
                 except:
                     pheromone_matrix[i][j]= evap
         
-        if time.time()-starttime>55 or stop_flag==1:
+        if time.time()-starttime>50 or stop_flag==1:
             return best_tour,best_tour_length
     return best_tour,best_tour_length
 
 #print(dist_matrix)
 tour,tour_length=ant_colony_opt()
-print(tour_of_nearest_neighbour,tour_length_of_nearest_neighbour)
-print(tour,tour_length)
+#print(tour_of_nearest_neighbour,tour_length_of_nearest_neighbour)
+#print(tour,tour_length)
 endtime=time.time()
-print('Time: ',endtime-starttime)
+#print('Time: ',endtime-starttime)
 
 
 ############

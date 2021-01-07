@@ -1,10 +1,3 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Mon Dec  7 17:27:57 2020
-
-@author: ich
-"""
-
 ############
 ############ ALTHOUGH I GIVE YOU THE 'BARE BONES' OF THIS PROGRAM WITH THE NAME
 ############ 'skeleton.py', YOU CAN RENAME IT TO ANYTHING YOU LIKE. HOWEVER, FOR
@@ -257,7 +250,7 @@ my_last_name = "Foerster"
 ############ 'alg_codes_and_tariffs.txt' (READ THIS FILE TO SEE THE CODES).
 ############
 
-algorithm_code = "PS"
+algorithm_code = "BH"
 
 ############
 ############ DO NOT TOUCH OR ALTER THE CODE BELOW! YOU HAVE BEEN WARNED!
@@ -281,206 +274,170 @@ added_note = ""
 ############
 ############ NOW YOUR CODE SHOULD BEGIN.
 ############
-starttime = time.time()  
-
-def generate_random_tour():
-    #make a list to cross off the cities that have been added
-    to_visit = []
-    for i in range(num_cities):
-        to_visit.append(i)
-    tour = []
-    for i in range(num_cities):
-        next_vertex = random.randint(0,num_cities-i-1)
-        tour.append(to_visit[next_vertex])
-        to_visit.pop(next_vertex)#delete city that has been added to tour
-    return tour
-
-def all_possible_swaps():
-    #in bubble_sort
-    #there are n-1 times swaps of (0,1) ... and 1 swap of (n-1,n)
-    #it is necessary to add the right amount of swaps for each of (i,i+1) to get the right probability of each swap
-    swaps = []
-    for i in range(num_cities):
-        for j in range(num_cities-i-1,0,-1):
-            new_swap = (i,i+1)
-            swaps.append(new_swap)
-    return swaps
-
-all_swaps = all_possible_swaps()
-
-def generate_random_velocity():
-    max_number_of_swaps = (num_cities*(num_cities-1))/2 #maximum number of swaps according to bubble_sort
-    num_of_swaps = random.randint(0,max_number_of_swaps)#random amount of swaps for each velocity
-    swap_possibilities = all_swaps.copy()
-    swaps = []#choose however many swaps from swap_possibilities as num_of_swaps
-    for i in range(num_of_swaps):
-        choose_swap = random.randint(0, len(swap_possibilities)-1)
-        swaps.append(swap_possibilities[choose_swap])
-        swap_possibilities.pop(choose_swap)
-    return swaps
 
 
-class Particle:
-    def __init__(self,ID,velocity,tour):
+#print(dist_matrix)
+
+class Node:
+    
+    def __init__(self,number,ID,state,parent_id,action,path_cost,depth):
+        self.number = number
         self.ID = ID
-        self.velocity = velocity
-        self.tour = tour
-        self.tour_length = -1
-        self.best_tour = []
-        self.best_tour_length = -1
-    
-    def add_velocity(self):
-        for swap in self.velocity:
-            i,j = swap
-            self.tour[i],self.tour[j]=self.tour[j],self.tour[i]
-        calculate_tour_length(self)
+        self.state = state
+        self.parent_id = parent_id
+        self.action = action
+        self.path_cost = path_cost
+        self.depth = depth
+        self.f_value = 0
         
-            
-    def multiply(self,num): #num can be a float
-        if num<1 and num>0:
-           k = math.floor(len(self.velocity)*num)
-           new_velocity = self.velocity.copy()
-           new_velocity = new_velocity[:k]
-           return new_velocity
-        if num==1:
-            return self.velocity
-        if num>1:
-            new_velocity=int(num)*self.velocity.copy()
-            k = math.floor(len(self.velocity)*(num-int(num)))
-            lst = self.velocity.copy()
-            new_velocity.extend(lst[:k])
-            return new_velocity
+    def setAction(self,new_action):
+        self.action=new_action
+    def setPathCost(self,new_path_cost):
+        self.path_cost=new_path_cost
+    def setfValue(self,fvalue):
+        self.f_value=fvalue
+    def getnumber(self):
+        return self.number
+    def getState(self):
+        return self.state
+    def getAction(self):
+        return self.action
+        
+    def getID(self):
+        return self.ID
+    def getdepth(self):
+        return self.depth
+    def getPathCost(self):
+        return self.path_cost
+   
+    
 
-def calculate_tour_length(particle):
-    length = 0
-    for i in range(len(particle.tour)-1):
-        length+=dist_matrix[particle.tour[i]][particle.tour[i+1]]
-    length+=dist_matrix[(particle.tour[len(particle.tour)-1])][(particle.tour[0])]
-    particle.tour_length = length
-    if particle.best_tour_length==-1:
-        particle.best_tour_length = length
-        particle.best_tour = particle.tour.copy()
+class State:
+        
+    def __init__(self,partial_tour):
+        self.partial_tour=partial_tour
+    
+    def isEmpty(self):
+        if len(self.partial_tour)==0:
+            return True
+        return False
+    
+    def get(self):
+        return self.partial_tour
+    
+    def add(self,node):
+        self.partial_tour.append(node.number)
+
+
+class PriorityQueue:
+    
+    def __init__(self):
+        self.queue = {}
+    
+    def get(self):
+        output = ""
+        for node in self.queue.values():
+            output+= " "+str(node.getnumber())
+        return output
+    def getlength(self):
+        output = 0
+        for node in self.queue:
+            output+=1
+        return output
+    
+    def isEmpty(self):
+        if len(self.queue)==0:
+            return True
+        return False
+    
+    def insert(self,node):
+        self.queue[node.getnumber()]=node
+    
+    def pop(self):
+        minimum = min(self.queue.values(),key=lambda node:node.action)
+        node_to_pop = list(self.queue.keys())[list(self.queue.values()).index(minimum)]
+        self.queue.pop(node_to_pop)
+        return minimum
+        ####!!!
+
+def greedy_best_first_search():
+    newid = 0
+    initial_state = State([0])
+    depth = 0
+    root_node = Node(0,newid,initial_state,'-',0,0,depth)
+    fringe = PriorityQueue()
+    fringe.insert(root_node)
+    closed = {}
+    if len(initial_state.get())==num_cities:
+        return root_node
     else:
-        if length<particle.best_tour_length:
-            particle.best_tour_length = length
-            particle.best_tour = particle.tour.copy()
-        
-def min_tour (particles):
-    for particle in particles:
-        calculate_tour_length(particle)
-    return min(particles,key=lambda particle:particle.best_tour_length)
-'''
-def bubble_sort(tour):
-    for i in range(num_cities):
-        swapped = False
-        for j in range(0,num_cities-i-1):
-            if tour[j]>tour[j+1]:
-                tour[j],tour[j+1]=tour[j+1],tour[j]
-                swapped = True
-        if swapped==False:
-            break
-'''
-def distance(p1,p2): #distance of two tours from each other
-    swaps = []
-    for i in range(num_cities):
-        swapped = False
-        for j in range(0,num_cities-i-1):
-            if p2.index(p1[j])>p2.index(p1[j+1]):
-                p1[j],p1[j+1]=p1[j+1],p1[j]
-                swaps.append((j,j+1))
-                swapped = True
-        if swapped == False:
-            break
-    return swaps
+        while not fringe.isEmpty():
+            expanded_node = fringe.pop()
+            new_depth = expanded_node.getdepth()
+            for i in range(1,num_cities):#all successors
+                if i==expanded_node.getnumber():
+                    continue
+                #if i in expanded_node.getState().get():
+                #    continue
+                newid = newid+1
+                #be careful about copy
+                new_partial_tour = expanded_node.getState().get().copy()
+                new_partial_tour.append(i)
+                #####
+                new_state = State(new_partial_tour)
+                new_dist = dist_matrix[expanded_node.number][i]
+                new_pathcost = expanded_node.getPathCost()+new_dist
+                #print(new_dist,new_pathcost)
+                new_depth = expanded_node.getdepth()+1
+                new_node = Node(i,newid,new_state,expanded_node.getID,new_dist,new_pathcost,new_depth)
+                if len(new_state.get())==num_cities:
+                    new_node.setAction(new_node.getAction()+dist_matrix[i][0])
+                    new_node.setPathCost(new_node.getPathCost()+dist_matrix[i][0])
+                    return new_node
+                else:
+                    unvisited_neighbours = []
+                    for i in range(1,num_cities):
+                        if i==new_node.getnumber():
+                            continue
+                        if i in closed:
+                            continue
+                        unvisited_neighbours.append(dist_matrix[new_node.number][i])
+                    if len(unvisited_neighbours)==0:
+                        return new_node
+                    h = min(unvisited_neighbours)
+                    f = new_node.getPathCost()+h
+                    new_node.setfValue(f)
+                    if new_node.getnumber() in fringe.queue:
+                        if fringe.queue[new_node.getnumber()].f_value<new_node.f_value:
+                            continue
+                        else:
+                            fringe.insert(new_node)
+                    elif new_node.getnumber() in closed:
+                        if closed[new_node.getnumber()].f_value<new_node.f_value:
+                            continue
+                        else:
+                            fringe.insert(new_node)
+                    else:
+                        fringe.insert(new_node)
+                    
+            closed[expanded_node.getnumber()]=expanded_node
+                #if fringe.getlength()>300:
+                #    return None
+                
+                
+            #print(fringe.get())
+                
+    return None
+starttime = time.time()      
+goal_node = greedy_best_first_search()
 
-def multiply(velocity, num): #num can be a float
-        if num<1 and num>0:
-           k = math.floor(len(velocity)*num)
-           new_velocity = velocity.copy()
-           new_velocity = new_velocity[:k]
-           return new_velocity
-        if num==1:
-            return velocity
-        if num>1:
-            new_velocity=int(num)*velocity.copy()
-            k = math.floor(len(velocity)*(num-int(num)))
-            lst = velocity.copy()
-            new_velocity.extend(lst[:k])
-            return new_velocity
-    
-
-
-###Parameters, user-defined####
-max_it = 20 #maximum number of iterations
-N= 5 #number of particles
-delta = math.inf #neighbourhood
-theta = 0.4 #inertia function: weight to be give to particle's current velocity
-alpha = 0.9 #cognitive learning factor: weight to be given to particle's own best position
-beta = 3 #social leraning factor: weight to be given to the particle's neighbourhood's best position
-
-def best_in_neighbourhood(particles,a):#including a
-    neighbourhood = [a]
-    for p in particles:
-        if p.ID == a.ID:
-            continue
-        if len(distance(a.tour.copy(),p.tour.copy()))<=delta:
-            neighbourhood.append(p)
-    return min(neighbourhood,key=lambda particle:particle.best_tour_length)
-'''
-def add_velocity(tour,velocity):
-    for swap in velocity:
-        i,j = swap
-        tour[i],tour[j]=tour[j],tour[i]
-    length = 0
-    for i in range(len(tour)-1):
-        length+=dist_matrix[tour[i]][tour[i+1]]
-    length+=dist_matrix[(tour[len(tour)-1])][(tour[0])]
-    return tour,length
-'''##just a check help function
-
-def particle_swarm_opt():
-    my_particles = []
-    for i in range(N):
-        my_particles.append(Particle(i,generate_random_velocity(),generate_random_tour()))
-    bestTour = min_tour(my_particles)
-    t = 0
-    stop_flag=0
-    while t<max_it:
-        for a in my_particles:
-            best_in_nhood = best_in_neighbourhood(my_particles, a)
-            current_tour = a.tour.copy()
-            a.add_velocity() #adding the velocity to the current tour to get new tour
-            ####NORMALISE VELOCITY###
-            a.velocity = distance(current_tour.copy(), a.tour.copy())
-            #########################
-            new_velocity = []
-            new_velocity.extend(a.multiply(theta))#adding the former velocity with weight theta
-            #calculate weight of particle's own position in new_velocity
-            dif_aBestTour_aCurTour = distance(a.best_tour.copy(),current_tour.copy()) #difference of a's best tour-a' current tour
-            #component-wise multiplication of epsilon*dif_aBestTour_aCurTour, 
-            #each component of epsilon is a random number between 0 and 1
-            #multiply random float in range (0,1) (-> epsilon) with dif_aBestTour_aCurTour
-            epsilon = random.random()
-            new_velocity.extend(multiply(dif_aBestTour_aCurTour,(epsilon*alpha)))
-            dif_nhoodBest_aCurTour = distance(best_in_nhood.best_tour.copy(),current_tour.copy())
-            epsilon_p = random.random()
-            new_velocity.extend(multiply(dif_nhoodBest_aCurTour, (epsilon_p*beta)))
-            a.velocity = new_velocity
-            if a.best_tour_length>a.tour_length:
-                a.best_tour_length=a.tour_length
-                a.best_tour=a.tour.copy()
-            if time.time()-starttime>55:
-                stop_flag=1
-                break
-        bestTour=min_tour(my_particles)
-        if time.time()-starttime>55 or stop_flag==1:
-            return bestTour.best_tour,bestTour.best_tour_length
-        t+=1
-    return bestTour.best_tour,bestTour.best_tour_length
-
-
-tour,tour_length=particle_swarm_opt()
-print(tour,tour_length)
+if goal_node == None:
+    print("No goal node has been found.")
+else:
+    tour = goal_node.state.get()
+    tour_length = goal_node.getPathCost()
+    print(tour)
+    print(tour_length)
 
 endtime=time.time()
 print('Time: ',endtime-starttime)
@@ -555,10 +512,11 @@ f.write(",\nNOTE = " + added_note)
 f.close()
 print("I have successfully written your tour to the tour file:\n   " + output_file_name + ".")
     
+ '''   
 
 
 
-'''
+
 
 
 

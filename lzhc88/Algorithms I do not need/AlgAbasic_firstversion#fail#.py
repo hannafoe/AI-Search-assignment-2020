@@ -12,6 +12,7 @@ import os
 import sys
 import time
 import random
+import math
 
 ############
 ############ NOW PLEASE SCROLL DOWN UNTIL THE NEXT BLOCK OF CAPITALIZED COMMENTS.
@@ -145,7 +146,7 @@ def read_in_algorithm_codes_and_tariffs(alg_codes_file):
 ############ THE CITY FILE IS IN THE FOLDER 'city-files'.
 ############
 
-input_file = "AISearchfile535.txt"
+input_file = "AISearchfile048.txt"
 
 ############
 ############ PLEASE SCROLL DOWN UNTIL THE NEXT BLOCK OF CAPITALIZED COMMENTS.
@@ -249,7 +250,7 @@ my_last_name = "Foerster"
 ############ 'alg_codes_and_tariffs.txt' (READ THIS FILE TO SEE THE CODES).
 ############
 
-algorithm_code = "AC"
+algorithm_code = "BH"
 
 ############
 ############ DO NOT TOUCH OR ALTER THE CODE BELOW! YOU HAVE BEEN WARNED!
@@ -274,297 +275,157 @@ added_note = ""
 ############ NOW YOUR CODE SHOULD BEGIN.
 ############
 
+
+#print(dist_matrix)
+
 class Node:
-    def __init__(self,ID,state,action,path_cost):
-        self.ID=ID
-        self.state=state
+    
+    def __init__(self,number,ID,state,parent_id,action,path_cost,depth):
+        self.number = number
+        self.ID = ID
+        self.state = state
+        self.parent_id = parent_id
         self.action = action
         self.path_cost = path_cost
+        self.depth = depth
+        
+    def setAction(self,new_action):
+        self.action=new_action
+    def setPathCost(self,new_path_cost):
+        self.path_cost=new_path_cost
+        
+    def getnumber(self):
+        return self.number
+    def getState(self):
+        return self.state
+    def getAction(self):
+        return self.action
+        
+    def getID(self):
+        return self.ID
+    def getdepth(self):
+        return self.depth
+    def getPathCost(self):
+        return self.path_cost
+    
 
 class State:
+        
     def __init__(self,partial_tour):
         self.partial_tour=partial_tour
+    
+    def isEmpty(self):
+        if len(self.partial_tour)==0:
+            return True
+        return False
     
     def get(self):
         return self.partial_tour
     
-        
-def basic_greedy():
-    node = Node(0,State([0]),0,0)
-    path = [node.ID]
-    while len(path)!=num_cities:
-        successors = []
-        for i in range(1,num_cities):#all successors
-            if i==node.ID:
-                continue
-            if i in path:
-                continue
-            new_id = i
-            new_partial_tour=node.state.get().copy()
-            new_partial_tour.append(i)
-            new_state = State(new_partial_tour)
-            new_dist = dist_matrix[node.ID][i]
-            new_pathcost = node.path_cost+new_dist
-            new_node = Node(new_id,new_state,new_dist,new_pathcost)
-            successors.append(new_node)
-        node = min(successors,key=lambda node:node.action)
-        path.append(node.ID)
-    path_cost=node.path_cost+(dist_matrix[0][node.ID])
-    return path,path_cost
-        
-    
+    def add(self,node):
+        self.partial_tour.append(node.number)
 
+
+class PriorityQueue:
+    
+    def __init__(self):
+        self.queue = []
+        self.visited =[]
+    
+    def get(self):
+        output = ""
+        for node in self.queue:
+            output+= " "+str(node.getnumber())
+        return output
+    def getlength(self):
+        output = 0
+        for node in self.queue:
+            output+=1
+        return output
+    
+    def isEmpty(self):
+        if len(self.queue)==0:
+            return True
+        return False
+    
+    def insert(self,node):
+        self.queue.append(node)
+    
+    def pop(self):
+        minimum = math.inf
+        node_to_pop = self.queue[0]
+        '''
+        if self.getlength()==1:
+            self.visited.append(node_to_pop)
+            self.queue.remove(node_to_pop)
+            return node_to_pop
+        '''
+        for n in self.queue:
+            
+            if n.getAction()<minimum:
+                #print(n.getAction(),n.getnumber())
+                minimum = n.getAction()
+                node_to_pop = n
+            
+        self.visited.append(node_to_pop.getnumber)
+        self.queue.remove(node_to_pop)
+        return node_to_pop
+
+
+def greedy_best_first_search():
+    newid = 0
+    initial_state = State([0])
+    depth = 0
+    root_node = Node(0,newid,initial_state,'-',0,0,depth)
+    fringe = PriorityQueue()
+    fringe.insert(root_node)
+    if len(initial_state.get())==num_cities:
+        return root_node
+    else:
+        while not fringe.isEmpty():
+            expanded_node = fringe.pop()
+            #print(str(expanded_node.getnumber())+'\n')
+            new_depth = expanded_node.getdepth
+            for i in range(1,num_cities):
+                if i==expanded_node.getnumber():
+                    continue
+                if i in expanded_node.getState().get():
+                    continue
+                newid = newid+1
+                #be careful about copy
+                new_partial_tour = expanded_node.getState().get().copy()
+                new_partial_tour.append(i)
+                #####
+                new_state = State(new_partial_tour)
+                new_dist = dist_matrix[expanded_node.number][i]
+                new_pathcost = expanded_node.getPathCost()+new_dist
+                #print(new_dist,new_pathcost)
+                new_depth = expanded_node.getdepth()+1
+                new_node = Node(i,newid,new_state,expanded_node.getID,new_dist,new_pathcost,new_depth)
+                if len(new_state.get())==num_cities:
+                    new_node.setAction(new_node.getAction()+dist_matrix[i][0])
+                    new_node.setPathCost(new_node.getPathCost()+dist_matrix[i][0])
+                    return new_node
+                else:
+                    fringe.insert(new_node)
+                #if fringe.getlength()>300:
+                #    return None
+                
+                
+            #print(fringe.get())
+                
+    return None
 starttime = time.time()      
-#####determine the intial best-tour by an initial basic greedy search##########
-tour_of_nearest_neighbour,tour_length_of_nearest_neighbour = basic_greedy()
+goal_node = greedy_best_first_search()
 
+if goal_node == None:
+    print("No goal node has been found.")
+else:
+    tour = goal_node.state.get()
+    tour_length = goal_node.getPathCost()
+    print(tour)
+    print(tour_length)
 
-
-####Parameters, user-defined####
-max_it = 1000 #maximum number of iterations
-N=num_cities#number of ants
-w=6
-row = 0.85 #pheromone decay rate
-tao_0 = w*(w-1)/(row*tour_length_of_nearest_neighbour) #initial pheromone deposit
-alpha = 1
-beta = 3
-
-######Change parameters according to size of input#####
-if N>300:
-    N=15
-elif N>200:
-    N=num_cities//10
-elif N>160:
-    N=num_cities//8
-elif N>130:
-    N=num_cities//4
-elif N>100:
-    N=num_cities//2
-
-
-added_note+=str(N)+' = number of ants, '+str(max_it)+' = maximum number of iterations, '+str(alpha)+' = alpha, '+str(beta)+' = beta, '+str(row)+' = row'+str(w)+' = w'
-
-####helpful structures####
-class Ant:
-    def __init__(self,ID):
-        self.ID = ID
-        self.current=random.randint(0, num_cities-2)
-        self.visited = [] #visited edges
-        self.visited_vertices =[]
-        self.path_cost=0
-
-#########pheromone to deposit on each edge...recomputed every round##############
-def build_pheromone_matrix():
-    matrix = []
-    for i in range(num_cities):
-        matrix.append([])
-        for j in range(num_cities):
-            matrix[i].append(tao_0)
-    return matrix
-pheromone_matrix = build_pheromone_matrix()
-
-
-    
-def probabilities_of_vertices(ant):
-    heuristic_desirabilities=[]
-    for i in range(num_cities):
-        if i == ant.current:
-            continue
-        if i in ant.visited_vertices:
-            continue
-        else:
-            if dist_matrix[ant.current][i]==0:#case that distance between two cities is 0
-                heuristic_desirabilities.append(1)#this is very desired, so 1 is added
-            else:#normal case, calculate desirability of going to an unvisited city
-                heuristic_desirabilities.append(1/dist_matrix[ant.current][i])#1/length of edge
-    if len(heuristic_desirabilities)==0:#all cities were visited
-        return 1 ###finished
-    #####Now calculate the overall probability of each edge being traversed next####
-    probies = []
-    index =0
-    sum_of_all =0
-    for i in range(num_cities):
-        if i == ant.current:
-            continue
-        if i in ant.visited_vertices:
-            continue
-        else:
-            ###prob=(current pheromone level at edge)^alpha*(1/length of edge)^beta
-            prob=((pheromone_matrix[ant.current][i])**alpha)*((heuristic_desirabilities[index])**beta)
-            sum_of_all+=prob
-            probies.append(prob)
-            index+=1
-    probabilities =[]
-    index =0
-    for i in range(num_cities):
-        if i == ant.current:
-            continue
-        if i in ant.visited_vertices:
-            continue
-        else:
-            ####the overall probability of each edge finally computed######
-            if sum_of_all==0:#in that case all the probabilities in probies are zero as well
-                print("NULL------")
-                probabilities.append(1)
-            else:
-                probabilities.append(probies[index]/sum_of_all)
-            index+=1
-    return probabilities
-
-
-
-def ant_colony_opt():
-    best_tour = tour_of_nearest_neighbour
-    best_tour_length = tour_length_of_nearest_neighbour
-    my_ants=[]
-    for i in range(N):
-        new_ant = Ant(i)
-        my_ants.append(new_ant)
-    ##reassignment as local variables to be able to change its values locally
-    w_local=w
-    row_local=row
-    stop_flag=0
-    for t in range(max_it): ###maybe change max_it later to time.time
-        #if t%2==0:
-        #    w_local+=1 #w is better left without incrementing
-        #print(pheromone_matrix)
-        if t==int(max_it*0.8):
-            row_local=0.5
-        for ant in my_ants:
-            ant.current=random.randint(0, num_cities-1)###WHY num_cities-2 and not num_cities-1????
-            ant.visited = [] #visited edges
-            ant.visited_vertices =[ant.current]
-            ant.path_cost=0
-            for i in range(num_cities):##create a full length path for each ant, loop num_cities times
-                probabilities = probabilities_of_vertices(ant)#get the probability that ant traverses each of the unvisited vertices
-                if probabilities ==1:##finished case###
-                    break
-                else:
-                    #print(ant.current)
-                    #print(probabilities)
-                    rand_float = random.random() # Random float:  0.0 <= x < 1.0
-                    #if(t>30 and t%5 and ant.ID%5==0):
-                    #    rand_float=0.01
-                    index = 1
-                    past = probabilities[0]
-                    next_vertex = 0
-                    best =  probabilities[0]
-                    ######Try to make it so that every now and then only the best solution is chosen and randomness is eliminated####
-                    if num_cities>100:
-                        freq = 2
-                    elif num_cities>50:
-                        freq = 4
-                    else:
-                        freq = 10
-                    if (t%2==0 and t<6) or (t>=6 and t%freq==0) or (t%5 and t>20 and i%2==0):
-                        index=0
-                        first=0
-                        for e in range(num_cities): #for all neighbouring vertices of i, compute next vertex probability
-                            if e == ant.current:
-                                continue
-                            elif e in ant.visited_vertices:
-                                continue
-                            else:
-                                if first==0:
-                                    next_vertex=e
-                                    first+=1
-                                #print(past)
-                                if probabilities[index]>best:
-                                    next_vertex=e
-                                    best=probabilities[index]
-                                index+=1
-
-                    #####Try to make choosing the city more random#######
-                    #####but the results were actually worse#############
-                    #elif (t%5 and t>20 and i%10==0):
-                    #    num = random.randint(0,len(probabilities))
-                    #    for e in range(num_cities): #for all neighbouring vertices of i, compute next vertex probability
-                    #        if e == ant.current:
-                    #            continue
-                    #        elif e in ant.visited_vertices:
-                    #            continue
-                    #       else:
-                    #            if index==num:
-                    #                next_vertex = e
-                    #                break
-                    #            index+=1
-                    
-                    #print('**',rand_float,'**')
-                    #The probability of each vertex being selected next was computed, now the ant will randomly choose 
-                    #which vertex to select according to the probabilities
-                    #all probabilities add up to 1, so select vertex according to random float between 0 and 1
-                    #if the probability of a vertex and the sum of the proabilities of vertices before is bigger than said float, then this vertex is chosen
-                    else:
-                        for e in range(num_cities): #for all neighbouring vertices of i, compute next vertex probability
-                            if e == ant.current:
-                                continue
-                            elif e in ant.visited_vertices:
-                                continue
-                            else:
-                                #print(past)
-                                if rand_float<past:
-                                    next_vertex = e
-                                    break
-                                past += probabilities[index]
-                                index+=1
-                    #print(next_vertex)
-                    ant.visited.append([ant.current,next_vertex])
-                    ant.path_cost+=dist_matrix[ant.current][next_vertex]
-                    ant.visited_vertices.append(next_vertex)
-                    ant.current = next_vertex
-            ant.path_cost+=dist_matrix[ant.current][ant.visited_vertices[0]]
-            ant.visited.append([ant.current,ant.visited_vertices[0]])
-            if time.time()-starttime>55:
-                stop_flag=1
-                break
-            #print(ant.visited_vertices,ant.path_cost)
-        #find ant with minimum path cost and compare with current best_tour path cost
-        my_ants.sort(key=lambda ant:ant.path_cost)
-        if my_ants[0].path_cost<best_tour_length:
-            best_tour = my_ants[0].visited_vertices
-            best_tour_length = my_ants[0].path_cost
-        ##deposit,evaporate pheromone on edges
-        #print('--------------')
-        list_of_pheromone_deposit = {}
-        list_of_best_tour_pheromone_deposit={}#for elitist ant system
-        count=1
-        for ant in my_ants:
-            for edge in ant.visited:
-                if count<=w_local:#rank-based ant system
-                    p=(w_local-count)*(1/(ant.path_cost))
-                else:
-                    p = 1/(ant.path_cost)
-                try:
-                    list_of_pheromone_deposit[tuple(edge)]+=p
-                except:
-                    list_of_pheromone_deposit[tuple(edge)]=p
-                ###look if edge is in best_tour####
-                if edge in best_tour:
-                    p_bst = 1/(best_tour_length)
-                    try:
-                        list_of_best_tour_pheromone_deposit[tuple(edge)]+=p_bst
-                    except:
-                        list_of_best_tour_pheromone_deposit[tuple(edge)]=p_bst
-            count+=1
-        for i in range(num_cities):
-            for j in range(num_cities):
-                evap = (1-row_local)*pheromone_matrix[i][j]
-                try:
-                    pheromone_matrix[i][j]= evap+list_of_pheromone_deposit[(i,j)]
-                except:
-                    pheromone_matrix[i][j]= evap
-                try:
-                    pheromone_matrix[i][j]+=(w_local*list_of_best_tour_pheromone_deposit[(i,j)])
-                except:
-                    pheromone_matrix[i][j]=pheromone_matrix[i][j] 
-        if time.time()-starttime>55 or stop_flag==1:
-            return best_tour,best_tour_length
-    return best_tour,best_tour_length
-
-#print(dist_matrix)
-tour,tour_length=ant_colony_opt()
-print(tour_of_nearest_neighbour,tour_length_of_nearest_neighbour)
-print(tour,tour_length)
 endtime=time.time()
 print('Time: ',endtime-starttime)
 
@@ -637,6 +498,7 @@ for i in range(1,num_cities):
 f.write(",\nNOTE = " + added_note)
 f.close()
 print("I have successfully written your tour to the tour file:\n   " + output_file_name + ".")
+    
     
 
 

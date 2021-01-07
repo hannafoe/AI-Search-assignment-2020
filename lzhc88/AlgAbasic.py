@@ -1,10 +1,3 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Mon Dec  7 17:27:57 2020
-
-@author: ich
-"""
-
 ############
 ############ ALTHOUGH I GIVE YOU THE 'BARE BONES' OF THIS PROGRAM WITH THE NAME
 ############ 'skeleton.py', YOU CAN RENAME IT TO ANYTHING YOU LIKE. HOWEVER, FOR
@@ -19,7 +12,6 @@ import os
 import sys
 import time
 import random
-import math
 
 ############
 ############ NOW PLEASE SCROLL DOWN UNTIL THE NEXT BLOCK OF CAPITALIZED COMMENTS.
@@ -153,7 +145,7 @@ def read_in_algorithm_codes_and_tariffs(alg_codes_file):
 ############ THE CITY FILE IS IN THE FOLDER 'city-files'.
 ############
 
-input_file = "AISearchfile012.txt"
+input_file = "AISearchfile175.txt"
 
 ############
 ############ PLEASE SCROLL DOWN UNTIL THE NEXT BLOCK OF CAPITALIZED COMMENTS.
@@ -257,7 +249,7 @@ my_last_name = "Foerster"
 ############ 'alg_codes_and_tariffs.txt' (READ THIS FILE TO SEE THE CODES).
 ############
 
-algorithm_code = "PS"
+algorithm_code = "AC"
 
 ############
 ############ DO NOT TOUCH OR ALTER THE CODE BELOW! YOU HAVE BEEN WARNED!
@@ -281,209 +273,217 @@ added_note = ""
 ############
 ############ NOW YOUR CODE SHOULD BEGIN.
 ############
-starttime = time.time()  
 
-def generate_random_tour():
-    #make a list to cross off the cities that have been added
-    to_visit = []
-    for i in range(num_cities):
-        to_visit.append(i)
-    tour = []
-    for i in range(num_cities):
-        next_vertex = random.randint(0,num_cities-i-1)
-        tour.append(to_visit[next_vertex])
-        to_visit.pop(next_vertex)#delete city that has been added to tour
-    return tour
+class Node:
+    def __init__(self,ID,state,action,path_cost):
+        self.ID=ID
+        self.state=state
+        self.action = action
+        self.path_cost = path_cost
 
-def all_possible_swaps():
-    #in bubble_sort
-    #there are n-1 times swaps of (0,1) ... and 1 swap of (n-1,n)
-    #it is necessary to add the right amount of swaps for each of (i,i+1) to get the right probability of each swap
-    swaps = []
-    for i in range(num_cities):
-        for j in range(num_cities-i-1,0,-1):
-            new_swap = (i,i+1)
-            swaps.append(new_swap)
-    return swaps
-
-all_swaps = all_possible_swaps()
-
-def generate_random_velocity():
-    max_number_of_swaps = (num_cities*(num_cities-1))/2 #maximum number of swaps according to bubble_sort
-    num_of_swaps = random.randint(0,max_number_of_swaps)#random amount of swaps for each velocity
-    swap_possibilities = all_swaps.copy()
-    swaps = []#choose however many swaps from swap_possibilities as num_of_swaps
-    for i in range(num_of_swaps):
-        choose_swap = random.randint(0, len(swap_possibilities)-1)
-        swaps.append(swap_possibilities[choose_swap])
-        swap_possibilities.pop(choose_swap)
-    return swaps
-
-
-class Particle:
-    def __init__(self,ID,velocity,tour):
-        self.ID = ID
-        self.velocity = velocity
-        self.tour = tour
-        self.tour_length = -1
-        self.best_tour = []
-        self.best_tour_length = -1
+class State:
+    def __init__(self,partial_tour):
+        self.partial_tour=partial_tour
     
-    def add_velocity(self):
-        for swap in self.velocity:
-            i,j = swap
-            self.tour[i],self.tour[j]=self.tour[j],self.tour[i]
-        calculate_tour_length(self)
+    def get(self):
+        return self.partial_tour
+    
         
-            
-    def multiply(self,num): #num can be a float
-        if num<1 and num>0:
-           k = math.floor(len(self.velocity)*num)
-           new_velocity = self.velocity.copy()
-           new_velocity = new_velocity[:k]
-           return new_velocity
-        if num==1:
-            return self.velocity
-        if num>1:
-            new_velocity=int(num)*self.velocity.copy()
-            k = math.floor(len(self.velocity)*(num-int(num)))
-            lst = self.velocity.copy()
-            new_velocity.extend(lst[:k])
-            return new_velocity
-
-def calculate_tour_length(particle):
-    length = 0
-    for i in range(len(particle.tour)-1):
-        length+=dist_matrix[particle.tour[i]][particle.tour[i+1]]
-    length+=dist_matrix[(particle.tour[len(particle.tour)-1])][(particle.tour[0])]
-    particle.tour_length = length
-    if particle.best_tour_length==-1:
-        particle.best_tour_length = length
-        particle.best_tour = particle.tour.copy()
-    else:
-        if length<particle.best_tour_length:
-            particle.best_tour_length = length
-            particle.best_tour = particle.tour.copy()
+def basic_greedy():
+    node = Node(0,State([0]),0,0)
+    path = [node.ID]
+    while len(path)!=num_cities:
+        successors = []
+        for i in range(1,num_cities):#all successors
+            if i==node.ID:
+                continue
+            if i in path:
+                continue
+            new_id = i
+            new_partial_tour=node.state.get().copy()
+            new_partial_tour.append(i)
+            new_state = State(new_partial_tour)
+            new_dist = dist_matrix[node.ID][i]
+            new_pathcost = node.path_cost+new_dist
+            new_node = Node(new_id,new_state,new_dist,new_pathcost)
+            successors.append(new_node)
+        node = min(successors,key=lambda node:node.action)
+        path.append(node.ID)
+    path_cost=node.path_cost+(dist_matrix[0][node.ID])
+    return path,path_cost
         
-def min_tour (particles):
-    for particle in particles:
-        calculate_tour_length(particle)
-    return min(particles,key=lambda particle:particle.best_tour_length)
-'''
-def bubble_sort(tour):
-    for i in range(num_cities):
-        swapped = False
-        for j in range(0,num_cities-i-1):
-            if tour[j]>tour[j+1]:
-                tour[j],tour[j+1]=tour[j+1],tour[j]
-                swapped = True
-        if swapped==False:
-            break
-'''
-def distance(p1,p2): #distance of two tours from each other
-    swaps = []
-    for i in range(num_cities):
-        swapped = False
-        for j in range(0,num_cities-i-1):
-            if p2.index(p1[j])>p2.index(p1[j+1]):
-                p1[j],p1[j+1]=p1[j+1],p1[j]
-                swaps.append((j,j+1))
-                swapped = True
-        if swapped == False:
-            break
-    return swaps
-
-def multiply(velocity, num): #num can be a float
-        if num<1 and num>0:
-           k = math.floor(len(velocity)*num)
-           new_velocity = velocity.copy()
-           new_velocity = new_velocity[:k]
-           return new_velocity
-        if num==1:
-            return velocity
-        if num>1:
-            new_velocity=int(num)*velocity.copy()
-            k = math.floor(len(velocity)*(num-int(num)))
-            lst = velocity.copy()
-            new_velocity.extend(lst[:k])
-            return new_velocity
     
 
+starttime = time.time()      
+#####determine the intial best-tour by an initial basic greedy search##########
+tour_of_nearest_neighbour,tour_length_of_nearest_neighbour = basic_greedy()
 
-###Parameters, user-defined####
+
+
+####Parameters, user-defined####
 max_it = 20 #maximum number of iterations
-N= 5 #number of particles
-delta = math.inf #neighbourhood
-theta = 0.4 #inertia function: weight to be give to particle's current velocity
-alpha = 0.9 #cognitive learning factor: weight to be given to particle's own best position
-beta = 3 #social leraning factor: weight to be given to the particle's neighbourhood's best position
+N= num_cities #number of ants
+tao_0 = N/tour_length_of_nearest_neighbour #initial pheromone deposit
+row = 0.5 #pheromone decay rate
+alpha = 1
+beta = 3
 
-def best_in_neighbourhood(particles,a):#including a
-    neighbourhood = [a]
-    for p in particles:
-        if p.ID == a.ID:
+added_note+=str(N)+' = number of ants, '+str(max_it)+' = maximum number of iterations, '+str(alpha)+' = alpha, '+str(beta)+' = beta, '+str(row)+' = row'
+
+####helpful structures####
+class Ant:
+    def __init__(self,ID):
+        self.ID = ID
+        self.current=random.randint(0, num_cities-2)
+        self.visited = [] #visited edges
+        self.visited_vertices =[]
+        self.path_cost=0
+
+#########pheromone to deposit on each edge...recomputed every round##############
+def build_pheromone_matrix():
+    matrix = []
+    for i in range(num_cities):
+        matrix.append([])
+        for j in range(num_cities):
+            matrix[i].append(tao_0)
+    return matrix
+pheromone_matrix = build_pheromone_matrix()
+
+
+    
+def probabilities_of_vertices(ant):
+    heuristic_desirabilities=[]
+    for i in range(num_cities):
+        if i == ant.current:
             continue
-        if len(distance(a.tour.copy(),p.tour.copy()))<=delta:
-            neighbourhood.append(p)
-    return min(neighbourhood,key=lambda particle:particle.best_tour_length)
-'''
-def add_velocity(tour,velocity):
-    for swap in velocity:
-        i,j = swap
-        tour[i],tour[j]=tour[j],tour[i]
-    length = 0
-    for i in range(len(tour)-1):
-        length+=dist_matrix[tour[i]][tour[i+1]]
-    length+=dist_matrix[(tour[len(tour)-1])][(tour[0])]
-    return tour,length
-'''##just a check help function
+        if i in ant.visited_vertices:
+            continue
+        else:
+            if dist_matrix[ant.current][i]==0:#case that distance between two cities is 0
+                heuristic_desirabilities.append(1)#this is very desired, so 1 is added
+            else:#normal case, calculate desirability of going to an unvisited city
+                heuristic_desirabilities.append(1/dist_matrix[ant.current][i])#1/length of edge
+    if len(heuristic_desirabilities)==0:#all cities were visited
+        return 1 ###finished
+    #####Now calculate the overall probability of each edge being traversed next####
+    probies = []
+    index =0
+    sum_of_all =0
+    for i in range(num_cities):
+        if i == ant.current:
+            continue
+        if i in ant.visited_vertices:
+            continue
+        else:
+            ###prob=(current pheromone level at edge)^alpha*(1/length of edge)^beta
+            prob=((pheromone_matrix[ant.current][i])**alpha)*((heuristic_desirabilities[index])**beta)
+            sum_of_all+=prob
+            probies.append(prob)
+            index+=1
+    probabilities =[]
+    index =0
+    for i in range(num_cities):
+        if i == ant.current:
+            continue
+        if i in ant.visited_vertices:
+            continue
+        else:
+            ####the overall probability of each edge finally computed######
+            probabilities.append(probies[index]/sum_of_all)
+            index+=1
+    return probabilities
 
-def particle_swarm_opt():
-    my_particles = []
+
+
+def ant_colony_opt():
+    best_tour = tour_of_nearest_neighbour
+    best_tour_length = tour_length_of_nearest_neighbour
+    my_ants=[]
     for i in range(N):
-        my_particles.append(Particle(i,generate_random_velocity(),generate_random_tour()))
-    bestTour = min_tour(my_particles)
-    t = 0
+        new_ant = Ant(i)
+        my_ants.append(new_ant)
     stop_flag=0
-    while t<max_it:
-        for a in my_particles:
-            best_in_nhood = best_in_neighbourhood(my_particles, a)
-            current_tour = a.tour.copy()
-            a.add_velocity() #adding the velocity to the current tour to get new tour
-            ####NORMALISE VELOCITY###
-            a.velocity = distance(current_tour.copy(), a.tour.copy())
-            #########################
-            new_velocity = []
-            new_velocity.extend(a.multiply(theta))#adding the former velocity with weight theta
-            #calculate weight of particle's own position in new_velocity
-            dif_aBestTour_aCurTour = distance(a.best_tour.copy(),current_tour.copy()) #difference of a's best tour-a' current tour
-            #component-wise multiplication of epsilon*dif_aBestTour_aCurTour, 
-            #each component of epsilon is a random number between 0 and 1
-            #multiply random float in range (0,1) (-> epsilon) with dif_aBestTour_aCurTour
-            epsilon = random.random()
-            new_velocity.extend(multiply(dif_aBestTour_aCurTour,(epsilon*alpha)))
-            dif_nhoodBest_aCurTour = distance(best_in_nhood.best_tour.copy(),current_tour.copy())
-            epsilon_p = random.random()
-            new_velocity.extend(multiply(dif_nhoodBest_aCurTour, (epsilon_p*beta)))
-            a.velocity = new_velocity
-            if a.best_tour_length>a.tour_length:
-                a.best_tour_length=a.tour_length
-                a.best_tour=a.tour.copy()
+    for t in range(max_it): ###maybe change max_it later to time.time 
+        #print(pheromone_matrix)
+        for ant in my_ants:
+            ant.current=random.randint(0, num_cities-2)
+            ant.visited = [] #visited edges
+            ant.visited_vertices =[ant.current]
+            ant.path_cost=0
+            for i in range(num_cities):##create a full length path for each ant, loop num_cities times
+                probabilities = probabilities_of_vertices(ant) #get the probability that ant traverses each of the unvisited vertices
+                if probabilities ==1:##finished case###
+                    break
+                else:
+                    #print(ant.current)
+                    #print(probabilities)
+                    rand_float = random.random() # Random float:  0.0 <= x < 1.0
+                    index = 1
+                    past = probabilities[0]
+                    next_vertex = 0
+                    #print('**',rand_float,'**')
+                    #The probability of each vertex being selected next was computed, now the ant will randomly choose 
+                    #which vertex to select according to the probabilities
+                    #all probabilities add up to 1, so select vertex according to random float between 0 and 1
+                    #if the probability of a vertex and the sum of the proabilities of vertices before is bigger than said float, then this vertex is chosen
+                    for e in range(num_cities):
+                        if e == ant.current:
+                            continue
+                        elif e in ant.visited_vertices:
+                            continue
+                        else:
+                            #print(past)
+                            if rand_float<past:
+                                next_vertex = e
+                                break
+                            past += probabilities[index]
+                            index+=1
+                    #print(next_vertex)
+                    ant.visited.append([ant.current,next_vertex])
+                    ant.path_cost+=dist_matrix[ant.current][next_vertex]
+                    ant.visited_vertices.append(next_vertex)
+                    ant.current = next_vertex
+            ant.path_cost+=dist_matrix[ant.current][ant.visited_vertices[0]]
+            ant.visited.append([ant.current,ant.visited_vertices[0]])
             if time.time()-starttime>55:
                 stop_flag=1
                 break
-        bestTour=min_tour(my_particles)
+            #print(ant.visited_vertices,ant.path_cost)
+        #find ant with minimum path cost and compare with current best_tour path cost
+        min_path_cost=min(my_ants,key=lambda ant:ant.path_cost)
+        if min_path_cost.path_cost<best_tour_length:
+            best_tour = min_path_cost.visited_vertices
+            best_tour_length = min_path_cost.path_cost
+        ##deposit,evaporate pheromone on edges
+        #print('--------------')
+        list_of_pheromone_deposit = {}
+        for ant in my_ants:
+            for edge in ant.visited:
+                p = 1/(ant.path_cost)
+                #pheromone_deposit_each_ant(ant, edge)
+                try:
+                    list_of_pheromone_deposit[tuple(edge)]+=p
+                except:
+                    list_of_pheromone_deposit[tuple(edge)]=p
+        for i in range(num_cities):
+            for j in range(num_cities):
+                evap = (1-row)*pheromone_matrix[i][j]
+                try:
+                    pheromone_matrix[i][j]= evap+list_of_pheromone_deposit[(i,j)]
+                except:
+                    pheromone_matrix[i][j]= evap
+        
         if time.time()-starttime>55 or stop_flag==1:
-            return bestTour.best_tour,bestTour.best_tour_length
-        t+=1
-    return bestTour.best_tour,bestTour.best_tour_length
+            return best_tour,best_tour_length
+    return best_tour,best_tour_length
 
-
-tour,tour_length=particle_swarm_opt()
+#print(dist_matrix)
+tour,tour_length=ant_colony_opt()
+print(tour_of_nearest_neighbour,tour_length_of_nearest_neighbour)
 print(tour,tour_length)
-
 endtime=time.time()
 print('Time: ',endtime-starttime)
+
 
 ############
 ############ YOUR CODE SHOULD NOW BE COMPLETE AND WHEN EXECUTION OF THIS PROGRAM 'skeleton.py'
@@ -502,7 +502,7 @@ print('Time: ',endtime-starttime)
 ############
 ############ DO NOT TOUCH OR ALTER THE CODE BELOW THIS POINT! YOU HAVE BEEN WARNED!
 ############
-'''
+
 flag = "good"
 length = len(tour)
 for i in range(0, length):
@@ -558,7 +558,7 @@ print("I have successfully written your tour to the tour file:\n   " + output_fi
 
 
 
-'''
+
 
 
 

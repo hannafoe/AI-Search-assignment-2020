@@ -321,8 +321,8 @@ tour_of_nearest_neighbour,tour_length_of_nearest_neighbour = basic_greedy()
 
 
 ####Parameters, user-defined####
-max_it = 5000 #maximum number of iterations
-N=num_cities*50#number of ants
+max_it = 10000 #maximum number of iterations
+N=num_cities#number of ants
 w=6
 row = 0.85 #pheromone decay rate
 tao_0 = w*(w-1)/(row*tour_length_of_nearest_neighbour) #initial pheromone deposit
@@ -404,9 +404,39 @@ def probabilities_of_vertices(ant):
         else:
             ####the overall probability of each edge finally computed######
             if sum_of_all==0:#in that case all the probabilities in probies are zero as well
-                print("NULL------")
-                print(probabilities,sum_of_all)
-                probabilities.append(1)
+                #then recalculate the probies with alpha=1 and beta=1, because probability was too small to detect otherwise
+                probies = []
+                index =0
+                sum_of_all =0
+                for i in range(num_cities):
+                    if i == ant.current:
+                        continue
+                    if i in ant.visited_vertices:
+                        continue
+                    else:
+                    ###prob=(current pheromone level at edge)^alpha*(1/length of edge)^beta
+                        prob=((pheromone_matrix[ant.current][i]))*((heuristic_desirabilities[index]))
+                        sum_of_all+=prob
+                        probies.append(prob)
+                        index+=1
+                if sum_of_all==0:
+                    #recalculate by only looking at the heuristic_desirability
+                    probies = []
+                    index =0
+                    sum_of_all =0
+                    for i in range(num_cities):
+                        if i == ant.current:
+                            continue
+                        if i in ant.visited_vertices:
+                            continue
+                        else:
+                        ###prob=(current pheromone level at edge)^alpha*(1/length of edge)^beta
+                            prob=heuristic_desirabilities[index]
+                            sum_of_all+=prob
+                            probies.append(prob)
+                            index+=1
+                index=0
+                probabilities.append(probies[index]/sum_of_all)
             else:
                 probabilities.append(probies[index]/sum_of_all)
             index+=1
@@ -515,7 +545,7 @@ def ant_colony_opt():
                     ant.current = next_vertex
             ant.path_cost+=dist_matrix[ant.current][ant.visited_vertices[0]]
             ant.visited.append([ant.current,ant.visited_vertices[0]])
-            if time.time()-starttime>300:
+            if time.time()-starttime>100:
                 stop_flag=1
                 break
             #print(ant.visited_vertices,ant.path_cost)
@@ -558,7 +588,7 @@ def ant_colony_opt():
                     pheromone_matrix[i][j]+=(w_local*list_of_best_tour_pheromone_deposit[(i,j)])
                 except:
                     pheromone_matrix[i][j]=pheromone_matrix[i][j] 
-        if time.time()-starttime>300 or stop_flag==1:
+        if time.time()-starttime>100 or stop_flag==1:
             return best_tour,best_tour_length
     return best_tour,best_tour_length
 

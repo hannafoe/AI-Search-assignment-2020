@@ -389,7 +389,42 @@ def probabilities_of_vertices(ant):
             continue
         else:
             ####the overall probability of each edge finally computed######
-            probabilities.append(probies[index]/sum_of_all)
+            if sum_of_all==0:#in that case all the probabilities in probies are zero as well
+                #then recalculate the probies with alpha=1 and beta=1, because probability was too small to detect otherwise
+                probies = []
+                index =0
+                sum_of_all =0
+                for i in range(num_cities):
+                    if i == ant.current:
+                        continue
+                    if i in ant.visited_vertices:
+                        continue
+                    else:
+                    ###prob=(current pheromone level at edge)^alpha*(1/length of edge)^beta
+                        prob=((pheromone_matrix[ant.current][i]))*((heuristic_desirabilities[index]))
+                        sum_of_all+=prob
+                        probies.append(prob)
+                        index+=1
+                if sum_of_all==0:#all probies are still zero
+                    #recalculate by only looking at the heuristic_desirability
+                    probies = []
+                    index =0
+                    sum_of_all =0
+                    for i in range(num_cities):
+                        if i == ant.current:
+                            continue
+                        if i in ant.visited_vertices:
+                            continue
+                        else:
+                        ###prob=(current pheromone level at edge)^alpha*(1/length of edge)^beta
+                            prob=heuristic_desirabilities[index]
+                            sum_of_all+=prob
+                            probies.append(prob)
+                            index+=1
+                index=0
+                probabilities.append(probies[index]/sum_of_all)
+            else:
+                probabilities.append(probies[index]/sum_of_all)
             index+=1
     return probabilities
 

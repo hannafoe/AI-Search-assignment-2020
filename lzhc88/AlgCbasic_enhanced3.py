@@ -153,7 +153,7 @@ def read_in_algorithm_codes_and_tariffs(alg_codes_file):
 ############ THE CITY FILE IS IN THE FOLDER 'city-files'.
 ############
 
-input_file = "AISearchfile535.txt"
+input_file = "AISearchfile180.txt"
 
 ############
 ############ PLEASE SCROLL DOWN UNTIL THE NEXT BLOCK OF CAPITALIZED COMMENTS.
@@ -451,12 +451,12 @@ def take(velocity,num): #num is an integer,the number of switches in velocity
 
 
 ###Parameters, user-defined####
-max_it = 100 #maximum number of iterations
-N=20 #number of particles
+max_it = 500 #maximum number of iterations
+N=100 #number of particles
 delta = math.inf #neighbourhood
-theta = 0.6 #inertia function: weight to be give to particle's current velocity
+theta = 0.4 #inertia function: weight to be give to particle's current velocity
 alpha = 0.6 #cognitive learning factor: weight to be given to particle's own best position
-beta = 1.2 #social leraning factor: weight to be given to the particle's neighbourhood's best position
+beta = 0.8 #social leraning factor: weight to be given to the particle's neighbourhood's best position
 
 ####Change parameters to fit size of input#######
 
@@ -530,7 +530,7 @@ def particle_swarm_opt():
                     choose_swap = random.randint(0, len(all_swaps)-1)
                     new_velocity.append(all_swaps[choose_swap])
                 a.velocity = new_velocity
-            elif abs(a.tour_length-best_in_nhood.best_tour_length)>(abs(worstTour_length-bestTour.best_tour_length)//3):
+            elif (abs(a.tour_length-best_in_nhood.best_tour_length)>(abs(worstTour_length-bestTour.best_tour_length)//3) or a.best_tour_length>8*bestTour.best_tour_length) and (a.ID%2==0 or a.ID%3==0):
                 ##In this case get back to vicinity of best in neigbourhood
                 new_velocity.extend(a.take(2))#adding two swaps of the former velocity (this is instead of theta)
                 ####################################################################################
@@ -548,7 +548,7 @@ def particle_swarm_opt():
                     new_velocity.append(all_swaps[choose_swap])
                 a.velocity = new_velocity
             #######velocity correction option 2######################################
-            elif a.tour_length>2*a.best_tour_length:
+            elif a.tour_length>1.2*a.best_tour_length:
                 ##In this case get back to vicinity of own best###
                 new_velocity.extend(a.take(2))#adding two swaps of the former velocity (this is instead of theta)
                 ######Now add the velocity to get to the vicinity of own best tour
@@ -565,7 +565,7 @@ def particle_swarm_opt():
                     choose_swap = random.randint(0, len(all_swaps)-1)
                     new_velocity.append(all_swaps[choose_swap])
                 a.velocity = new_velocity
-            elif a.tour_length<1.2*a.best_tour_length:
+            elif a.tour_length<1.05*a.best_tour_length:
                 ####to look in the vicinity only make small changes##########
                 for i in range(2):
                     choose_swap = random.randint(0, len(all_swaps)-1)
@@ -586,18 +586,18 @@ def particle_swarm_opt():
                 new_velocity.extend(multiply(dif_nhoodBest_aCurTour, (beta)))
                 a.velocity = new_velocity
             a.add_velocity() #adding the velocity to the current tour to get new tour
-            if time.time()-starttime>3000:
+            if time.time()-starttime>1500:
                 stop_flag=1
                 break
             ####NORMALISE VELOCITY###
             a.velocity = distance(current_tour.copy(), a.tour.copy())
             #########################
-        print(time.time()-starttime)
-        for a in my_particles:
-            print(a.best_tour,a.best_tour_length,a.tour,a.tour_length)
-        print()
+        #print(time.time()-starttime)
+        #for a in my_particles:
+        #    print(a.best_tour,a.best_tour_length,a.tour,a.tour_length)
+        #print()
         bestTour=min_tour(my_particles)
-        if time.time()-starttime>3000 or stop_flag==1:
+        if time.time()-starttime>1500 or stop_flag==1:
             return bestTour.best_tour,bestTour.best_tour_length
         t+=1
     print(bestTour.ID)

@@ -145,7 +145,7 @@ def read_in_algorithm_codes_and_tariffs(alg_codes_file):
 ############ THE CITY FILE IS IN THE FOLDER 'city-files'.
 ############
 
-input_file = "AISearchfile021.txt"
+input_file = "AISearchfile058.txt"
 
 ############
 ############ PLEASE SCROLL DOWN UNTIL THE NEXT BLOCK OF CAPITALIZED COMMENTS.
@@ -545,7 +545,7 @@ def ant_colony_opt():
                     ant.current = next_vertex
             ant.path_cost+=dist_matrix[ant.current][ant.visited_vertices[0]]
             ant.visited.append([ant.current,ant.visited_vertices[0]])
-            if time.time()-starttime>100:
+            if time.time()-starttime>400:
                 stop_flag=1
                 break
             #print(ant.visited_vertices,ant.path_cost)
@@ -588,7 +588,7 @@ def ant_colony_opt():
                     pheromone_matrix[i][j]+=(w_local*list_of_best_tour_pheromone_deposit[(i,j)])
                 except:
                     pheromone_matrix[i][j]=pheromone_matrix[i][j] 
-        if time.time()-starttime>100 or stop_flag==1:
+        if time.time()-starttime>400 or stop_flag==1:
             return best_tour,best_tour_length
     return best_tour,best_tour_length
 

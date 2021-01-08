@@ -283,6 +283,27 @@ added_note = ""
 ############
 starttime = time.time()  
 
+###PARAMETERS###########################################################################################
+max_it = 1000 #maximum number of iterations
+N=100 #number of particles
+delta = math.inf #neighbourhood
+theta = 0.4 #inertia function: weight to be give to particle's current velocity
+alpha = 0.6 #cognitive learning factor: weight to be given to particle's own best position
+beta = 0.8 #social leraning factor: weight to be given to the particle's neighbourhood's best position
+
+####Change parameters to fit size of input#######
+
+if num_cities<20:
+    N=100
+elif num_cities<40:
+    N=50
+elif num_cities<60:
+    N=25
+elif num_cities<80:
+    N=20
+else:
+    N=10
+
 def generate_random_tour():
     #make a list to cross off the cities that have been added
     to_visit = []
@@ -399,28 +420,6 @@ def multiply(velocity, num): #num can be a float
             return new_velocity
     
 
-
-###Parameters, user-defined####
-max_it = 1000 #maximum number of iterations
-N= 10 #number of particles
-delta = math.inf #neighbourhood
-theta = 0.4 #inertia function: weight to be give to particle's current velocity
-alpha = 0.9 #cognitive learning factor: weight to be given to particle's own best position
-beta = 3 #social leraning factor: weight to be given to the particle's neighbourhood's best position
-
-####Change parameters to fit size of input#######
-
-if num_cities<20:
-    N=100
-elif num_cities<40:
-    N=50
-elif num_cities<60:
-    N=25
-elif num_cities<80:
-    N=20
-else:
-    N=10
-
 def best_in_neighbourhood(particles,a):#including a
     neighbourhood = [a]
     for p in particles:
@@ -505,7 +504,7 @@ endtime=time.time()
 ############
 ############ DO NOT TOUCH OR ALTER THE CODE BELOW THIS POINT! YOU HAVE BEEN WARNED!
 ############
-'''
+
 flag = "good"
 length = len(tour)
 for i in range(0, length):
@@ -561,7 +560,7 @@ print("I have successfully written your tour to the tour file:\n   " + output_fi
 
 
 
-'''
+
 
 
 

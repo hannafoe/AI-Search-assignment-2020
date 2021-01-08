@@ -274,6 +274,32 @@ added_note = ""
 ############ NOW YOUR CODE SHOULD BEGIN.
 ############
 
+#######PARAMETERS###############################################################################
+max_it = 1000 #maximum number of iterations
+N=num_cities#number of ants
+w=6 ##is not used in the basic implementation, but since the parameters have to be set at the same value
+##it is defined to be able to define tao_0
+row = 0.85 #pheromone decay rate
+alpha = 1
+beta = 3
+#initial pheromone deposit tao_0 cannot be defined yet
+#as the value depends on the length of the tour from the nearest neighbour algorithm below
+#tao_0 is defined right below the nearest neighbour algorithm
+
+######Change parameters according to size of input#####
+if N>300:
+    N=5
+elif N>200:
+    N=15
+elif N>160:
+    N=num_cities//8
+elif N>130:
+    N=num_cities//6
+elif N>80:
+    N=num_cities//4
+elif N>40:
+    N=num_cities//2
+
 class Node:
     def __init__(self,ID,state,action,path_cost):
         self.ID=ID
@@ -313,34 +339,14 @@ def basic_greedy():
     return path,path_cost
         
     
-
 starttime = time.time()      
 #####determine the intial best-tour by an initial basic greedy search##########
 tour_of_nearest_neighbour,tour_length_of_nearest_neighbour = basic_greedy()
 
+####LAST PARAMETER INITIALISED#####################################################
+tao_0 = w*(w-1)/(row*tour_length_of_nearest_neighbour) #initial pheromone deposit
 
 
-####Parameters, user-defined####
-max_it = 20 #maximum number of iterations
-N= num_cities #number of ants
-tao_0 = N/tour_length_of_nearest_neighbour #initial pheromone deposit
-row = 0.5 #pheromone decay rate
-alpha = 1
-beta = 3
-
-######Change parameters according to size of input#####
-if N>300:
-    N=5
-elif N>200:
-    N=15
-elif N>160:
-    N=num_cities//8
-elif N>130:
-    N=num_cities//6
-elif N>80:
-    N=num_cities//4
-elif N>40:
-    N=num_cities//2
 
 
 ####helpful structures####
@@ -451,8 +457,7 @@ def ant_colony_opt():
         new_ant = Ant(i)
         my_ants.append(new_ant)
     stop_flag=0
-    for t in range(max_it): ###maybe change max_it later to time.time 
-        #print(pheromone_matrix)
+    for t in range(max_it): 
         for ant in my_ants:
             ant.current=random.randint(0, num_cities-2)
             ant.visited = [] #visited edges
@@ -463,13 +468,10 @@ def ant_colony_opt():
                 if probabilities ==1:##finished case###
                     break
                 else:
-                    #print(ant.current)
-                    #print(probabilities)
                     rand_float = random.random() # Random float:  0.0 <= x < 1.0
                     index = 1
                     past = probabilities[0]
                     next_vertex = 0
-                    #print('**',rand_float,'**')
                     #The probability of each vertex being selected next was computed, now the ant will randomly choose 
                     #which vertex to select according to the probabilities
                     #all probabilities add up to 1, so select vertex according to random float between 0 and 1
@@ -480,13 +482,11 @@ def ant_colony_opt():
                         elif e in ant.visited_vertices:
                             continue
                         else:
-                            #print(past)
                             if rand_float<past:
                                 next_vertex = e
                                 break
                             past += probabilities[index]
                             index+=1
-                    #print(next_vertex)
                     ant.visited.append([ant.current,next_vertex])
                     ant.path_cost+=dist_matrix[ant.current][next_vertex]
                     ant.visited_vertices.append(next_vertex)
@@ -496,7 +496,6 @@ def ant_colony_opt():
             if time.time()-starttime>50:
                 stop_flag=1
                 break
-            #print(ant.visited_vertices,ant.path_cost)
         #find ant with minimum path cost and compare with current best_tour path cost
         min_path_cost=min(my_ants,key=lambda ant:ant.path_cost)
         if min_path_cost.path_cost<best_tour_length:
@@ -524,7 +523,6 @@ def ant_colony_opt():
             return best_tour,best_tour_length
     return best_tour,best_tour_length
 
-#print(dist_matrix)
 tour,tour_length=ant_colony_opt()
 #print(tour_of_nearest_neighbour,tour_length_of_nearest_neighbour)
 #print(tour,tour_length)

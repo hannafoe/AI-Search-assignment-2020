@@ -282,7 +282,29 @@ added_note = ""
 ############ NOW YOUR CODE SHOULD BEGIN.
 ############
 starttime = time.time()  
-#####basic greedy algorithm##########################
+
+###PARAMETERS###########################################################################################
+max_it = 1000 #maximum number of iterations
+N=100 #number of particles
+delta = math.inf #neighbourhood
+theta = 0.4 #inertia function: weight to be give to particle's current velocity
+alpha = 0.6 #cognitive learning factor: weight to be given to particle's own best position
+beta = 0.8 #social leraning factor: weight to be given to the particle's neighbourhood's best position
+
+####Change parameters to fit size of input#######
+
+if num_cities<20:
+    N=100
+elif num_cities<40:
+    N=50
+elif num_cities<60:
+    N=25
+elif num_cities<80:
+    N=20
+else:
+    N=10
+
+#####BASIC GREEDY ALGORITHM ######################################################################
 class Node:
     def __init__(self,ID,state,action,path_cost):
         self.ID=ID
@@ -320,7 +342,7 @@ def basic_greedy():
         path.append(node.ID)
     path_cost=node.path_cost+(dist_matrix[0][node.ID])
     return path,path_cost
-#########################################
+######################################################
 def generate_random_tour():
     to_visit = []
     for i in range(num_cities):
@@ -450,26 +472,7 @@ def take(velocity,num): #num is an integer,the number of switches in velocity
         return new_velocity
 
 
-###Parameters, user-defined####
-max_it = 1000 #maximum number of iterations
-N=100 #number of particles
-delta = math.inf #neighbourhood
-theta = 0.4 #inertia function: weight to be give to particle's current velocity
-alpha = 0.6 #cognitive learning factor: weight to be given to particle's own best position
-beta = 0.8 #social leraning factor: weight to be given to the particle's neighbourhood's best position
 
-####Change parameters to fit size of input#######
-
-if num_cities<20:
-    N=100
-elif num_cities<40:
-    N=50
-elif num_cities<60:
-    N=25
-elif num_cities<80:
-    N=20
-else:
-    N=10
 
 
 def best_in_neighbourhood(particles,a):

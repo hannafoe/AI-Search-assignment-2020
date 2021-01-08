@@ -274,6 +274,33 @@ added_note = ""
 ############ NOW YOUR CODE SHOULD BEGIN.
 ############
 
+#######PARAMETERS###############################################################################
+max_it = 1000 #maximum number of iterations
+N=num_cities#number of ants
+w=6
+row = 0.85 #pheromone decay rate
+alpha = 1
+beta = 3
+#initial pheromone deposit tao_0 cannot be defined yet
+#as the value depends on the length of the tour from the nearest neighbour algorithm below
+#tao_0 is defined right below the nearest neighbour algorithm
+
+######Change parameters according to size of input#####
+
+if N>300:
+    N=5
+elif N>200:
+    N=15
+elif N>160:
+    N=num_cities//8
+elif N>130:
+    N=num_cities//6
+elif N>80:
+    N=num_cities//4
+elif N>40:
+    N=num_cities//2
+
+
 class Node:
     def __init__(self,ID,state,action,path_cost):
         self.ID=ID
@@ -288,7 +315,6 @@ class State:
     def get(self):
         return self.partial_tour
     
-        
 def basic_greedy():
     node = Node(0,State([0]),0,0)
     path = [node.ID]
@@ -313,36 +339,12 @@ def basic_greedy():
     return path,path_cost
         
     
-
 starttime = time.time()      
 #####determine the intial best-tour by an initial basic greedy search##########
 tour_of_nearest_neighbour,tour_length_of_nearest_neighbour = basic_greedy()
 
-
-
-####Parameters, user-defined####
-max_it = 1000 #maximum number of iterations
-N=num_cities#number of ants
-w=6
-row = 0.85 #pheromone decay rate
+####LAST PARAMETER INITIALISED#####################################################
 tao_0 = w*(w-1)/(row*tour_length_of_nearest_neighbour) #initial pheromone deposit
-alpha = 1
-beta = 3
-
-######Change parameters according to size of input#####
-
-if N>300:
-    N=5
-elif N>200:
-    N=15
-elif N>160:
-    N=num_cities//8
-elif N>130:
-    N=num_cities//6
-elif N>80:
-    N=num_cities//4
-elif N>40:
-    N=num_cities//2
 
 
 
@@ -460,7 +462,6 @@ def ant_colony_opt():
     for t in range(max_it): ###maybe change max_it later to time.time
         #if t%2==0:
         #    w_local+=1 #w is better left without incrementing
-        #print(pheromone_matrix)
         if t==int(max_it*0.8):
             row_local=0.5
         for ant in my_ants:

@@ -429,6 +429,7 @@ def best_in_neighbourhood(particles,a):#including a
             neighbourhood.append(p)
     return min(neighbourhood,key=lambda particle:particle.best_tour_length)
 
+##just a check help function######
 def add_velocity(tour,velocity):
     for swap in velocity:
         i,j = swap
@@ -438,7 +439,7 @@ def add_velocity(tour,velocity):
         length+=dist_matrix[tour[i]][tour[i+1]]
     length+=dist_matrix[(tour[len(tour)-1])][(tour[0])]
     return tour,length
-##just a check help function
+###################################
 
 def particle_swarm_opt():
     my_particles = []

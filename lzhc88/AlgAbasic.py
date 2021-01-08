@@ -287,6 +287,7 @@ beta = 3
 #tao_0 is defined right below the nearest neighbour algorithm
 
 ######Change parameters according to size of input#####
+######For under a minute N has to be small enough to run at least 10 iterations#####
 if N>300:
     N=5
 elif N>200:

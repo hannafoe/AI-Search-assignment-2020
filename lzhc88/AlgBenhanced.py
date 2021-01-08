@@ -541,7 +541,7 @@ def particle_swarm_opt():
                 #####################################################################################
                 ######Now add the velocity to get to the vicinity of the best tour in neighbourhood######
                 dif_nhoodBest_aCurTour = distance(a.tour.copy(),best_in_nhood.best_tour.copy())
-                new_velocity.extend(take(dif_nhoodBest_aCurTour,int(0.9*len(dif_nhoodBest_aCurTour))))
+                new_velocity.extend(take(dif_nhoodBest_aCurTour,int(0.85*len(dif_nhoodBest_aCurTour))))
                 #add two extra random swaps
                 for i in range(2):
                     choose_swap = random.randint(0, len(all_swaps)-1)

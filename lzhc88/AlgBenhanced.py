@@ -284,7 +284,7 @@ added_note = ""
 starttime = time.time()  
 
 ###PARAMETERS###########################################################################################
-max_it = 1000 #maximum number of iterations
+max_it = 1000 #maximum number of iterations, timer stops the algorithm at 50s
 N=100 #number of particles
 delta = math.inf #neighbourhood
 theta = 0.4 #inertia function: weight to be give to particle's current velocity

@@ -275,7 +275,7 @@ added_note = ""
 ############
 
 #######PARAMETERS###############################################################################
-max_it = 1000 #maximum number of iterations
+max_it = 1000 #maximum number of iterations, timer stops at 50s
 N=num_cities#number of ants
 w=6 ##is not used in the basic implementation, but since the parameters have to be set at the same value
 ##it is defined to be able to define tao_0

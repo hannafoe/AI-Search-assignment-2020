@@ -275,7 +275,7 @@ added_note = ""
 ############
 
 #######PARAMETERS###############################################################################
-max_it = 1000 #maximum number of iterations
+max_it = 1000 #maximum number of iterations, timer stops the algorithm at 50s
 N=num_cities#number of ants
 w=6
 row = 0.85 #pheromone decay rate

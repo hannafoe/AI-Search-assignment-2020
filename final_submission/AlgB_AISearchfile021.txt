@@ -1,0 +1,5 @@
+USER = lzhc88 (Hanna Foerster),
+ALGORITHM CODE = PS, NAME OF CITY-FILE = AISearchfile021.txt,
+SIZE = 21, TOUR LENGTH = 2884,
+17,8,14,0,6,9,12,19,16,10,4,20,11,5,1,3,2,13,15,7,18,
+NOTE = 

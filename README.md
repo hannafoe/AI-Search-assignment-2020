@@ -3,7 +3,7 @@ This is the assignment for the sub-module AI Search of the module Artificial Int
 ## Files
 - "Algorithms I do not need" is a file which contains first versions of the implementation.
 - "city-files" contains the set of nodes the Algorithms were tested on.
-- "lzhc88" is the final submission file
+- "final_submission" is the final submission file
 
 ## Overview
 You are to implement two different algorithms (call them AlgA and AlgB) in Python to solve the Travelling Salesman Problem (TSP). Your algorithms can be drawn from those we cover in the lectures but you might also implement other algorithms you have devised or discovered for yourself.

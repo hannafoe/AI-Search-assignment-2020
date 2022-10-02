@@ -1,0 +1,62 @@
+Feedback for user-ID lzhc88
+
+Throughout this validation, as many error messages as possible are returned in order to help you understand what might have gone wrong.
+However, note that sometimes a single error might lead to early termination of the validation process so that fixing this error results
+in more, as yet unseen errors. So, the list of error messages might not be exhaustive but its the best I can do.
+
+The first part of this feedback is validation of the program files that you submitted, in terms of the key information they need to contain.
+At this stage, the programs are not executed; that will follow later. Please note that for any program cluster, if any of
+the following are true then the program cluster is INVALID and neither it nor the tours it produces will secure any marks:
+ - the basic program does not exist
+ - the basic program exists but its user-name mis-matches the definitive user-name
+ - the basic program exists but its algorithm code is illegal
+ - the basic program exists but it imports an illegal module
+ - the enhanced program exists but its user-name mismatches the definitive user-name
+ - the enhanced program exists but its algorithm code mis-matches with that of the basic program
+ - the enhanced program exists but it imports an illegal module.
+Also, if you have two valid program clusters but they have the same algorithm code then both clusters are invalid.
+(Of course, invalidity can be avoided if you check your programs using this program prior to submission!)
+
+#####  Program submission
+#####   * program cluster AlgA:
+#####      - AlgAbasic.py: the program file has successfully been validated (ant colony optimization, tariff 9)
+#####      - AlgAenhanced.py: the program file has successfully been validated (ant colony optimization, tariff 9)
+#####   * program cluster AlgB:
+#####      - AlgBbasic.py: the program file has successfully been validated (particle swarm optimization, tariff 10)
+#####      - AlgBenhanced.py: the program file has successfully been validated (particle swarm optimization, tariff 10)
+
+The next part of this feedback is validation of the tour files that you submitted. Each has been validated and the outcome is described below.
+If any tour has an associated error message then it is deemed to be invalid and it will secure no marks. Remember: as stated above, any tours
+arising from an invalid program cluster will not secure any marks (irrespective of whether they are actually legal tours or not). The tour
+lengths of successfully validated tours given below go to form your tour-quality mark.
+
+#####  Tour file submission
+#####   * program cluster AlgA:
+#####      - AlgA_AISearchfile012.txt: a good tour of length 56 (ant colony optimization)
+#####      - AlgA_AISearchfile017.txt: a good tour of length 1444 (ant colony optimization)
+#####      - AlgA_AISearchfile021.txt: a good tour of length 2549 (ant colony optimization)
+#####      - AlgA_AISearchfile026.txt: a good tour of length 1537 (ant colony optimization)
+#####      - AlgA_AISearchfile042.txt: a good tour of length 1344 (ant colony optimization)
+#####      - AlgA_AISearchfile048.txt: a good tour of length 12542 (ant colony optimization)
+#####      - AlgA_AISearchfile058.txt: a good tour of length 25798 (ant colony optimization)
+#####      - AlgA_AISearchfile175.txt: a good tour of length 21944 (ant colony optimization)
+#####      - AlgA_AISearchfile180.txt: a good tour of length 1950 (ant colony optimization)
+#####      - AlgA_AISearchfile535.txt: a good tour of length 50146 (ant colony optimization)
+#####   * program cluster AlgB:
+#####      - AlgB_AISearchfile012.txt: a good tour of length 56 (particle swarm optimization)
+#####      - AlgB_AISearchfile017.txt: a good tour of length 1578 (particle swarm optimization)
+#####      - AlgB_AISearchfile021.txt: a good tour of length 2884 (particle swarm optimization)
+#####      - AlgB_AISearchfile026.txt: a good tour of length 1707 (particle swarm optimization)
+#####      - AlgB_AISearchfile042.txt: a good tour of length 1648 (particle swarm optimization)
+#####      - AlgB_AISearchfile048.txt: a good tour of length 15357 (particle swarm optimization)
+#####      - AlgB_AISearchfile058.txt: a good tour of length 27200 (particle swarm optimization)
+#####      - AlgB_AISearchfile175.txt: a good tour of length 21966 (particle swarm optimization)
+#####      - AlgB_AISearchfile180.txt: a good tour of length 5450 (particle swarm optimization)
+#####      - AlgB_AISearchfile535.txt: a good tour of length 50413 (particle swarm optimization)
+
+The next part of this feedback simply states whether or not the proforma was submitted. There is no penalty for not submitting the proforma but
+no enhancement marks will be awarded without a proforma.
+
+#####  Additional items submission
+#####   * AISearchProforma.pdf: submitted
+

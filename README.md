@@ -1,5 +1,10 @@
 # AI-Search-assignment-2020
-This is the assignment for the sub-module AI Search of the module Artificial Intelligence at Durham University in 2020. The following explains the assignment. For more information please refer to AISearchAssignment2020-21.pdf.
+This is the assignment for the sub-module AI Search of the module Artificial Intelligence at Durham University in 2020. In this assignment I have implemented the Ant-Colony-Optimisation and the Particle-Swarm-Optimisation. The following explains the assignment. For more information on the assignment please refer to  AISearchAssignment2020-21.pdf.
+## Files
+- "Algorithms I do not need" is a file which contains first versions of the implementation.
+- "city-files" contains the set of nodes the Algorithms were tested on.
+- "lzhc88" is the final submission file
+
 ## Overview
 You are to implement two different algorithms (call them AlgA and AlgB) in Python to solve the Travelling Salesman Problem (TSP). Your algorithms can be drawn from those we cover in the lectures but you might also implement other algorithms you have devised or discovered for yourself.
 Your implementations should seek to obtain the best TSP tours that you can, given 10 collections of cities and their city-to-city distances that I will supply to you. You will need to hand in the following items:
